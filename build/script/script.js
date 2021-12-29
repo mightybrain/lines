@@ -92,6 +92,17 @@ class ActiveBall {
 
 let activeBall = null;
 
+function deselectBall() {
+	markPosition(activeBall.position, activeBall.key);
+	activeBall = null;
+}
+
+function selectBall(position) {
+	const key = field[position.y][position.x];
+	activeBall = new ActiveBall(key, balls[key], position);
+	markPosition(position, '-');
+}
+
 
 //--------------------------------------------------------
 
@@ -99,7 +110,7 @@ let activeBall = null;
 // Игровой цикл
 function startGame() {
 	spawnBalls();
-	gameLoop();
+	requestAnimationFrame(gameLoop);
 }
 
 function gameLoop() {
@@ -114,13 +125,13 @@ function gameLoop() {
 
 // Обновление игрового поля
 function updateGame() {
-	if (activeBall !== null && activeBall.path !== null) {
-		updateActiveBallPosition();
-	}
+	updateActiveBallPosition();
 }
 
-
 function updateActiveBallPosition() {
+	if (activeBall === null || activeBall.path === null) {
+		return;
+	}
 	let targetPosition = activeBall.path[0];
 	const direction = {
 		x: (targetPosition.x - activeBall.position.x).toFixed(1),
@@ -140,7 +151,6 @@ function updateActiveBallPosition() {
 	if (activeBall.path.length === 0) {
 		markPosition(activeBall.position, activeBall.key);
 		const clearedSequence = clearSequences([activeBall.position]);
-		activeBall.path = null;
 		activeBall = null;
 		if (clearedSequence.length === 0) {
 			spawnBalls();
@@ -154,9 +164,6 @@ function updateActiveBallPosition() {
 function drawGame() {
 	drawField();
 	drawBalls();
-	if (activeBall !== null) {
-		drawActiveBall();
-	}
 	drawPreparedBalls();
 	drawScore();
 }
@@ -188,29 +195,25 @@ function drawField() {
 
 function drawBalls() {
 	field.forEach((row, y) => {
-		row.forEach((positionKey, x) => {
-			if (positionKey === '-' || positionKey === 'x' || positionKey === 'a') {
+		row.forEach((key, x) => {
+			if (key === '-' || key === 'x' || key === 'a') {
 				return;
 			}
-			drawBall(balls[positionKey], { x, y });
+			const position = {
+				x: config.outerOffsetX + config.innerOffset + x * config.cellSize + x * config.delimiterSize + config.cellInnerOffset,
+				y: config.outerOffsetY + config.innerOffset + y * config.cellSize + y * config.delimiterSize + config.cellInnerOffset,
+			}
+			drawBall(balls[key], position);
 		})
 	})
-}
 
-function drawActiveBall() {
-	drawBall(activeBall.colors, activeBall.position);
-}
-
-function drawBall(colors, position) {
-	const x = config.outerOffsetX + config.innerOffset + position.x * config.cellSize + position.x * config.delimiterSize + config.cellInnerOffset;
-	const y = config.outerOffsetY + config.innerOffset + position.y * config.cellSize + position.y * config.delimiterSize + config.cellInnerOffset;
-
-	let gradient = context.createRadialGradient(x + config.ballGradientOffset, y + config.ballGradientOffset, 0, x + config.ballGradientOffset, y + config.ballGradientOffset, 30)
-	gradient.addColorStop(0, colors[0]);
-	gradient.addColorStop(.5, colors[1]);
-	gradient.addColorStop(1, colors[2]);
-	context.fillStyle = gradient;
-	drawRoundedRect(context, x, y, 42, 42, 21);
+	if (activeBall !== null) {
+		const position = {
+			x: config.outerOffsetX + config.innerOffset + activeBall.position.x * config.cellSize + activeBall.position.x * config.delimiterSize + config.cellInnerOffset,
+			y: config.outerOffsetY + config.innerOffset + activeBall.position.y * config.cellSize + activeBall.position.y * config.delimiterSize + config.cellInnerOffset,
+		}
+		drawBall(activeBall.colors, position);
+	}
 }
 
 function drawPreparedBalls() {
@@ -225,13 +228,19 @@ function drawPreparedBalls() {
 		y += config.cellInnerOffset;
 
 		const colors = balls[key];
-		let gradient = context.createRadialGradient(x + config.ballGradientOffset, y + config.ballGradientOffset, 0, x + config.ballGradientOffset, y + config.ballGradientOffset, 30)
-		gradient.addColorStop(0, colors[0]);
-		gradient.addColorStop(.5, colors[1]);
-		gradient.addColorStop(1, colors[2]);
-		context.fillStyle = gradient;
-		drawRoundedRect(context, x, y, 42, 42, 21);
+		drawBall(colors, { x, y })
 	})
+}
+
+function drawBall(colors, position) {
+	const { x, y } = position;
+
+	let gradient = context.createRadialGradient(x + config.ballGradientOffset, y + config.ballGradientOffset, 0, x + config.ballGradientOffset, y + config.ballGradientOffset, 30)
+	gradient.addColorStop(0, colors[0]);
+	gradient.addColorStop(.5, colors[1]);
+	gradient.addColorStop(1, colors[2]);
+	context.fillStyle = gradient;
+	drawRoundedRect(context, x, y, 42, 42, 21);
 }
 
 function drawScore() {
@@ -259,30 +268,27 @@ function prepareBallColors() {
 }
 
 function prepareBalls() {
-	const freePositions = getFreePositions();
-	if (freePositions.length === 0) {
-		return;
-	}
+	let freePositions = getFreePositions();
 
-	let preparedBalls = [];
-	do {
-		const key = nextPreparedColors.length ? nextPreparedColors.shift() : ballsKeys[getRandomFromRange(0, ballsKeys.length)];
-		const position = freePositions[getRandomFromRange(0, freePositions.length)];
-		preparedBalls.push({ key, position });
-		markPosition(position, 'x');
-	} while (preparedBalls.length < config.spawnBallAtTime)
-	return preparedBalls;
+	if (freePositions.length > 0) {
+		let preparedBalls = [];
+		do {
+			const key = nextPreparedColors.length ? nextPreparedColors.shift() : ballsKeys[getRandomFromRange(0, ballsKeys.length)];
+			const position = freePositions[getRandomFromRange(0, freePositions.length)];
+			preparedBalls.push({ key, position });
+			freePositions = freePositions.filter(freePosition => !positionsAreEqual(freePosition, position))
+		} while (preparedBalls.length < config.spawnBallAtTime || freePositions.lenght > 0)
+		return preparedBalls;
+	}
 }
 
 function spawnBalls() {
 	const ballsToSpawn = prepareBalls();
-	nextPreparedColors = prepareBallColors();
 	ballsToSpawn.forEach((ball) => {
 		markPosition(ball.position, ball.key);
 	})
-	clearSequences(ballsToSpawn.map((ball) => {
-		return ball.position;
-	}))
+	clearSequences(ballsToSpawn.map(ball => ball.position))
+	nextPreparedColors = prepareBallColors();
 }
 
 
@@ -409,18 +415,13 @@ function handleClick(event) {
 	const y = Math.floor((event.offsetY - config.outerOffsetY - config.innerOffset) / (config.cellSize + config.delimiterSize));
 	const position = { x, y };
 
-	if (!positionIsAvailable(position)) {
-		if (activeBall !== null) {
-			markPosition(activeBall.position, activeBall.key);
-		}
-		const ballKey = field[position.y][position.x];
-		markPosition(position, '-');
-		activeBall = new ActiveBall(ballKey, balls[ballKey], position);
-	} else if (positionIsAvailable(position) && activeBall !== null && !positionsAreEqual(position, activeBall.position)) {
-		const path = findPath(activeBall.position, position);
-		if (path !== null) {
-			activeBall.path = path;
-		}
+	if (positionIsAvailable(position) && activeBall !== null) {
+		activeBall.path = findPath(activeBall.position, position);
+	} else if (!positionIsAvailable(position) && activeBall !== null) {
+		deselectBall();
+		selectBall(position);
+	} else if (!positionIsAvailable(position)) {
+		selectBall(position);
 	}
 }
 
@@ -430,26 +431,23 @@ function handleClick(event) {
 
 // Вспомогательные функции
 function getRandomFromRange(from, to) {
-	if (from === to) {
-		return from;
-	}
-	return from + Math.floor(Math.random() * (to - from));
+	return from === to ? from : from + Math.floor(Math.random() * (to - from));
 }
 
-function markPosition(cell, key) {
-	field[cell.y][cell.x] = key;
+function markPosition(position, key) {
+	field[position.y][position.x] = key;
 }
 
-function positionIsAvailable(cell) {
-	return positionExist(cell) && field[cell.y][cell.x] === '-';
+function positionIsAvailable(position) {
+	return positionExist(position) && field[position.y][position.x] === '-' && (activeBall === null || !positionsAreEqual(position, activeBall.position));
 }
 
-function positionExist(cell) {
-	return cell.x >= 0 && cell.x < config.fieldSize && cell.y >= 0 && cell.y < config.fieldSize;
+function positionExist(position) {
+	return position.x >= 0 && position.x < config.fieldSize && position.y >= 0 && position.y < config.fieldSize;
 }
 
-function arrIncludesPosition(path, cell) {
-	return typeof path.find(position => position.x === cell.x && position.y === cell.y) !== 'undefined';
+function arrIncludesPosition(path, position) {
+	return typeof path.find(pathPart => pathPart.x === position.x && pathPart.y === position.y) !== 'undefined';
 }
 
 function positionsAreEqual(a, b) {
