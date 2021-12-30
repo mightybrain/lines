@@ -26,6 +26,17 @@ const config = {
 //--------------------------------------------------------
 
 
+// Стор
+let store = {
+	score: 0,
+	activeBall: null,
+	nextPreparedColors: []
+}
+
+
+//--------------------------------------------------------
+
+
 // Игровое поле
 let field = buildField();
 
@@ -58,10 +69,8 @@ function getFreePositions() {
 
 
 // Счет
-let score = 0;
-
 function increaseScore(ballsCounter) {
-	score += ballsCounter * config.scorePerBall;
+	store.score += ballsCounter * config.scorePerBall;
 }
 
 
@@ -90,16 +99,16 @@ class ActiveBall {
 	}
 }
 
-let activeBall = null;
-
 function deselectBall() {
-	markPosition(activeBall.position, activeBall.key);
-	activeBall = null;
+	const deselectedBall = Object.assign({}, store.activeBall);
+	markPosition(store.activeBall.position, store.activeBall.key);
+	store.activeBall = null;
+	return deselectedBall;
 }
 
 function selectBall(position) {
 	const key = field[position.y][position.x];
-	activeBall = new ActiveBall(key, balls[key], position);
+	store.activeBall = new ActiveBall(key, balls[key], position);
 	markPosition(position, '-');
 }
 
@@ -129,32 +138,32 @@ function updateGame() {
 }
 
 function updateActiveBallPosition() {
-	if (activeBall === null || activeBall.path === null) {
+	if (!store.activeBall || !store.activeBall.path) {
 		return;
 	}
-	let targetPosition = activeBall.path[0];
+	let targetPosition = store.activeBall.path[0];
 	const direction = {
-		x: (targetPosition.x - activeBall.position.x).toFixed(1),
-		y: (targetPosition.y - activeBall.position.y).toFixed(1)
+		x: (targetPosition.x - store.activeBall.position.x).toFixed(1),
+		y: (targetPosition.y - store.activeBall.position.y).toFixed(1)
 	}
 	for (let axis in direction) {
 		if (Math.abs(direction[axis]) <= config.ballSpeed) {
-			activeBall.position[axis] = targetPosition[axis];
+			store.activeBall.position[axis] = targetPosition[axis];
 		} else {
-			activeBall.position[axis] += direction[axis] * config.ballSpeed;
+			store.activeBall.position[axis] += direction[axis] * config.ballSpeed;
 		}	
 	}
-
-	if (positionsAreEqual(activeBall.position, targetPosition)) {
-		activeBall.path = activeBall.path.slice(1);
+	if (positionsAreEqual(store.activeBall.position, targetPosition)) {
+		store.activeBall.path = store.activeBall.path.slice(1);
 	}
-	if (activeBall.path.length === 0) {
-		markPosition(activeBall.position, activeBall.key);
-		const clearedSequence = clearSequences([activeBall.position]);
-		activeBall = null;
-		if (clearedSequence.length === 0) {
-			spawnBalls();
-		}
+
+	if (store.activeBall.path.length > 0) {
+		return;
+	}
+	const deselectedBall = deselectBall();
+	const clearedSequence = clearSequences([deselectedBall.position]);
+	if (clearedSequence.length === 0) {
+		spawnBalls();
 	}
 }
 
@@ -185,10 +194,10 @@ function drawField() {
 		})
 	})
 
-	if (activeBall) {
+	if (store.activeBall) {
 		context.fillStyle = '#335070';
-		const x = config.outerOffsetX + config.innerOffset + activeBall.position.x * config.cellSize + activeBall.position.x * config.delimiterSize;
-		const y = config.outerOffsetY + config.innerOffset + activeBall.position.y * config.cellSize + activeBall.position.y * config.delimiterSize;
+		const x = config.outerOffsetX + config.innerOffset + store.activeBall.position.x * config.cellSize + store.activeBall.position.x * config.delimiterSize;
+		const y = config.outerOffsetY + config.innerOffset + store.activeBall.position.y * config.cellSize + store.activeBall.position.y * config.delimiterSize;
 		drawRoundedRect(context, x, y, config.cellSize, config.cellSize, 20);
 	}
 }
@@ -207,17 +216,17 @@ function drawBalls() {
 		})
 	})
 
-	if (activeBall !== null) {
+	if (store.activeBall) {
 		const position = {
-			x: config.outerOffsetX + config.innerOffset + activeBall.position.x * config.cellSize + activeBall.position.x * config.delimiterSize + config.cellInnerOffset,
-			y: config.outerOffsetY + config.innerOffset + activeBall.position.y * config.cellSize + activeBall.position.y * config.delimiterSize + config.cellInnerOffset,
+			x: config.outerOffsetX + config.innerOffset + store.activeBall.position.x * config.cellSize + store.activeBall.position.x * config.delimiterSize + config.cellInnerOffset,
+			y: config.outerOffsetY + config.innerOffset + store.activeBall.position.y * config.cellSize + store.activeBall.position.y * config.delimiterSize + config.cellInnerOffset,
 		}
-		drawBall(activeBall.colors, position);
+		drawBall(store.activeBall.colors, position);
 	}
 }
 
 function drawPreparedBalls() {
-	nextPreparedColors.forEach((key, index) => {
+	store.nextPreparedColors.forEach((key, index) => {
 		let x = config.outerOffsetX + config.innerOffset + index * config.cellSize + index * config.delimiterSize;
 		let y = 40;
 
@@ -245,9 +254,9 @@ function drawBall(colors, position) {
 
 function drawScore() {
 	context.font = '52px LuckiestGuy';
-	let text = context.measureText(score);
+	let text = context.measureText(store.score);
 	context.fillStyle = 'white';
-	context.fillText(score, 676 - config.outerOffsetX - config.innerOffset - text.width, 87);
+	context.fillText(store.score, 676 - config.outerOffsetX - config.innerOffset - text.width, 87);
 }
 
 
@@ -255,8 +264,6 @@ function drawScore() {
 
 
 // Добавление шаров на поле
-nextPreparedColors = [];
-
 function prepareBallColors() {
 	let ballColors = [];
 
@@ -270,14 +277,14 @@ function prepareBallColors() {
 function prepareBalls() {
 	let freePositions = getFreePositions();
 
-	if (freePositions.length > 0) {
+	if (freePositions.length) {
 		let preparedBalls = [];
 		do {
-			const key = nextPreparedColors.length ? nextPreparedColors.shift() : ballsKeys[getRandomFromRange(0, ballsKeys.length)];
+			const key = store.nextPreparedColors.length ? store.nextPreparedColors.shift() : ballsKeys[getRandomFromRange(0, ballsKeys.length)];
 			const position = freePositions[getRandomFromRange(0, freePositions.length)];
 			preparedBalls.push({ key, position });
 			freePositions = freePositions.filter(freePosition => !positionsAreEqual(freePosition, position))
-		} while (preparedBalls.length < config.spawnBallAtTime || freePositions.lenght > 0)
+		} while (preparedBalls.length < config.spawnBallAtTime || freePositions.lenght)
 		return preparedBalls;
 	}
 }
@@ -288,7 +295,7 @@ function spawnBalls() {
 		markPosition(ball.position, ball.key);
 	})
 	clearSequences(ballsToSpawn.map(ball => ball.position))
-	nextPreparedColors = prepareBallColors();
+	store.nextPreparedColors = prepareBallColors();
 }
 
 
@@ -415,9 +422,9 @@ function handleClick(event) {
 	const y = Math.floor((event.offsetY - config.outerOffsetY - config.innerOffset) / (config.cellSize + config.delimiterSize));
 	const position = { x, y };
 
-	if (positionIsAvailable(position) && activeBall !== null) {
-		activeBall.path = findPath(activeBall.position, position);
-	} else if (!positionIsAvailable(position) && activeBall !== null) {
+	if (positionIsAvailable(position) && store.activeBall) {
+		store.activeBall.path = findPath(store.activeBall.position, position);
+	} else if (!positionIsAvailable(position) && store.activeBall) {
 		deselectBall();
 		selectBall(position);
 	} else if (!positionIsAvailable(position)) {
@@ -439,7 +446,7 @@ function markPosition(position, key) {
 }
 
 function positionIsAvailable(position) {
-	return positionExist(position) && field[position.y][position.x] === '-' && (activeBall === null || !positionsAreEqual(position, activeBall.position));
+	return positionExist(position) && field[position.y][position.x] === '-' && (!store.activeBall|| !positionsAreEqual(position, store.activeBall.position));
 }
 
 function positionExist(position) {
