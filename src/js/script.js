@@ -194,7 +194,7 @@ function drawField() {
 		})
 	})
 
-	if (store.activeBall) {
+	if (store.activeBall && !store.activeBall.path) {
 		context.fillStyle = '#335070';
 		const x = config.outerOffsetX + config.innerOffset + store.activeBall.position.x * config.cellSize + store.activeBall.position.x * config.delimiterSize;
 		const y = config.outerOffsetY + config.innerOffset + store.activeBall.position.y * config.cellSize + store.activeBall.position.y * config.delimiterSize;
@@ -276,17 +276,19 @@ function prepareBallColors() {
 
 function prepareBalls() {
 	let freePositions = getFreePositions();
+	let preparedBalls = [];
+	const preparedBallsCounter = freePositions.length < config.spawnBallAtTime ? freePositions.length : config.spawnBallAtTime; 
 
-	if (freePositions.length) {
-		let preparedBalls = [];
+	if (preparedBallsCounter) {
 		do {
 			const key = store.nextPreparedColors.length ? store.nextPreparedColors.shift() : ballsKeys[getRandomFromRange(0, ballsKeys.length)];
 			const position = freePositions[getRandomFromRange(0, freePositions.length)];
 			preparedBalls.push({ key, position });
 			freePositions = freePositions.filter(freePosition => !positionsAreEqual(freePosition, position))
-		} while (preparedBalls.length < config.spawnBallAtTime || freePositions.lenght)
-		return preparedBalls;
+		} while (preparedBalls.length < preparedBallsCounter)
 	}
+
+	return preparedBalls;
 }
 
 function spawnBalls() {
