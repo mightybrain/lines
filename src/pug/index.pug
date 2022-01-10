@@ -1,15 +1,25 @@
 doctype html
-html(lang="ru")
+html(lang='ru')
 	head
-		meta(charset="utf-8")
-		meta(name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1")
-		link(rel="stylesheet" href="style/normalize.css" type="text/css")
-		link(rel="stylesheet" href="style/main.css" type="text/css")
+		meta(charset='utf-8')
+		meta(name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1')
+		style(type='text/css').
+			@font-face {
+				font-family: 'LuckiestGuy';
+				src: url('./fonts/luckiest-guy.woff2') format('woff2');
+				font-weight: 300;
+				font-style: normal;
+			}
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
 		title Lines
 	body
-		main
-			//canvas#lines.lines(width='768' height='960')
-			canvas#lines.lines(width='676' height='752')
-		script(src="script/script.js")
+		canvas#lines(width='676' height='752')
+		script(src='script/GameModel.js')
+		script(src='script/GameRenderer.js')
+		script(src='script/Game.js')
 
 
