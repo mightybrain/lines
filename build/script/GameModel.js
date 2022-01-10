@@ -35,7 +35,7 @@ class GameModel {
 	}
 
 	_buildField() {
-		let field = [];
+		const field = [];
 		for (let i = 0; i < this._fieldLength; i++) {
 			let row = [];
 			for (let j = 0; j < this._fieldLength; j++) {
@@ -47,7 +47,7 @@ class GameModel {
 	}
 
 	_prepareBallColors() {
-		let ballColors = [];
+		const ballColors = [];
 	
 		do {
 			ballColors.push(this._ballsKeys[this._getRandomFromRange(0, this._ballsKeys.length)]);
@@ -60,7 +60,7 @@ class GameModel {
 		let freePositions = this._getFreePositions();
 		const ballsToSpawnCounter = freePositions.length < this._spawnBallAtTime ? freePositions.length : this._spawnBallAtTime;
 
-		let ballsToSpawn = [];
+		const ballsToSpawn = [];
 		do {
 			const key = this._nextPreparedColors.length ? this._nextPreparedColors.shift() : this._ballsKeys[this._getRandomFromRange(0, this._ballsKeys.length)];
 			const position = freePositions[this._getRandomFromRange(0, freePositions.length)];
@@ -83,7 +83,7 @@ class GameModel {
 		if (!this._activeBall || !this._activeBall.path) {
 			return;
 		}
-		let targetPosition = this._activeBall.path[0];
+		const targetPosition = this._activeBall.path[0];
 		const direction = {
 			x: (targetPosition.x - this._activeBall.position.x).toFixed(1),
 			y: (targetPosition.y - this._activeBall.position.y).toFixed(1)
@@ -135,8 +135,8 @@ class GameModel {
 		const directions = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x:-1, y: 0 }];
 		
 		let path = null;
-		let steps = [{ position: from, path: []}];
-		let viewedPositions = [from];
+		const steps = [{ position: from, path: []}];
+		const viewedPositions = [from];
 		
 		do {
 			const step = steps.shift();
@@ -158,7 +158,7 @@ class GameModel {
 	}
 
 	_clearSequences(positions) {
-		let sequences = [];
+		const sequences = [];
 		const axes = ['x', 'y'];
 	
 		positions.forEach((position) => {
@@ -195,7 +195,7 @@ class GameModel {
 	}
 
 	_getFreePositions() {
-		let freePositions = [];
+		const freePositions = [];
 		this._field.forEach((row, y) => {
 			row.forEach((position, x) => {
 				if (position !== '-') {
@@ -227,9 +227,9 @@ class GameModel {
 			}
 		];
 	
-		let sequence = [position];
+		const sequence = [position];
 		const sequenceKey = this._field[position.y][position.x];
-		let queue = [position];
+		const queue = [position];
 		const axisDirections = directions.filter(direction => direction.axis === axis);
 		do {
 			const position = queue.shift();

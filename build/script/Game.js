@@ -8,7 +8,6 @@ class Game {
 		this._outerOffsetY = 136;
 		this._innerOffset = 10;
 		this._cellSize = 56;
-		this._cellInnerOffset = 7;
 		this._ballSize = 42;
 		this._delimiterSize = 4;
 		this._fieldLength = 9;
@@ -33,7 +32,6 @@ class Game {
 			this._outerOffsetY,
 			this._innerOffset,
 			this._cellSize,
-			this._cellInnerOffset,
 			this._ballSize,
 			this._delimiterSize,		
 			this._fieldLength,	
@@ -75,7 +73,6 @@ class Game {
 				this._outerOffsetY,
 				this._innerOffset,
 				this._cellSize,
-				this._cellInnerOffset,
 				this._ballSize,
 				this._delimiterSize,
 			);
@@ -91,13 +88,12 @@ class Game {
 		this._canvas.width = this._canvasWidth;
 		this._canvas.height = this._canvasHeight;
 
-		this._fieldSize = this._canvasWidth * 0.82 > this._canvasHeight * 0.74 ? this._canvasHeight * 0.74 : this._canvasWidth * 0.82;
+		this._fieldSize = this._canvasWidth * 0.9 > this._canvasHeight * 0.74 ? this._canvasHeight * 0.74 : this._canvasWidth * 0.9;
 		this._outerOffsetX = (this._canvasWidth - this._fieldSize) / 2;
 		this._outerOffsetY = this._fieldSize * 0.24 > this._canvasHeight * 0.18 ? this._canvasHeight * 0.18 : this._fieldSize * 0.24;
 		this._innerOffset = this._fieldSize * 0.018;
 		this._delimiterSize = this._fieldSize * 0.007;
 		this._cellSize = (this._fieldSize - this._innerOffset * 2 - this._delimiterSize * (this._fieldLength - 1)) / this._fieldLength;
-		this._cellInnerOffset = this._fieldSize * 0.013;
 		this._ballSize = this._fieldSize * 0.075;
 	}
 
@@ -109,11 +105,10 @@ class Game {
 		if (event.offsetX < borderLeft || event.offsetX > borderRight || event.offsetY < borderTop || event.offsetY > borderBottom) {
 			return;
 		}
+
 		const x = Math.floor((event.offsetX - this._outerOffsetX - this._innerOffset) / (this._cellSize + this._delimiterSize));
 		const y = Math.floor((event.offsetY - this._outerOffsetY - this._innerOffset) / (this._cellSize + this._delimiterSize));
-		const position = { x, y };
-
-		this._model.handleClick(position);
+		this._model.handleClick({ x, y });
 	}
 }
 

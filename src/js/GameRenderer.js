@@ -1,5 +1,5 @@
 class GameRenderer {
-	constructor(ctx, model, rendererWidth, rendererHeight, fieldSize, outerOffsetX, outerOffsetY, innerOffset, cellSize, cellInnerOffset, ballSize, delimiterSize, fieldLength) {
+	constructor(ctx, model, rendererWidth, rendererHeight, fieldSize, outerOffsetX, outerOffsetY, innerOffset, cellSize, ballSize, delimiterSize, fieldLength) {
 		this._ctx = ctx;
 		this._model = model;
 		this._rendererWidth = rendererWidth;
@@ -9,13 +9,12 @@ class GameRenderer {
 		this._outerOffsetY = outerOffsetY;
 		this._innerOffset = innerOffset;
 		this._cellSize = cellSize;
-		this._cellInnerOffset = cellInnerOffset;
 		this._ballSize = ballSize;
 		this._delimiterSize = delimiterSize;
 		this._fieldLength = fieldLength;
 	}
 
-	setSize(rendererWidth, rendererHeight, fieldSize, outerOffsetX, outerOffsetY, innerOffset, cellSize, cellInnerOffset, ballSize, delimiterSize) {
+	setSize(rendererWidth, rendererHeight, fieldSize, outerOffsetX, outerOffsetY, innerOffset, cellSize, ballSize, delimiterSize) {
 		this._rendererWidth = rendererWidth;
 		this._rendererHeight = rendererHeight;
 		this._fieldSize = fieldSize;
@@ -23,7 +22,6 @@ class GameRenderer {
 		this._outerOffsetY = outerOffsetY;
 		this._innerOffset = innerOffset;
 		this._cellSize = cellSize;
-		this._cellInnerOffset = cellInnerOffset;
 		this._ballSize = ballSize;
 		this._delimiterSize = delimiterSize;
 	}
@@ -41,7 +39,7 @@ class GameRenderer {
 	}
 
 	_drawField() {
-		let ctx = this._ctx;
+		const ctx = this._ctx;
 		const model = this._model;
 
 		ctx.fillStyle = '#4DAF34';
@@ -75,14 +73,15 @@ class GameRenderer {
 		const model = this._model;
 
 		const field = model.getField();
+		const cellInnerOffset = (this._cellSize - this._ballSize) / 2;
 		field.forEach((row, y) => {
 			row.forEach((key, x) => {
 				if (key === '-') {
 					return;
 				}
 				const position = {
-					x: this._outerOffsetX + this._innerOffset + x * this._cellSize + x * this._delimiterSize + this._cellInnerOffset,
-					y: this._outerOffsetY + this._innerOffset + y * this._cellSize + y * this._delimiterSize + this._cellInnerOffset,
+					x: this._outerOffsetX + this._innerOffset + x * this._cellSize + x * this._delimiterSize + cellInnerOffset,
+					y: this._outerOffsetY + this._innerOffset + y * this._cellSize + y * this._delimiterSize + cellInnerOffset,
 				}
 				this._drawBall(model.getColors(key), position);
 			})
@@ -91,15 +90,15 @@ class GameRenderer {
 		const activeBall = model.getActiveBall();
 		if (activeBall) {
 			const position = {
-				x: this._outerOffsetX + this._innerOffset + activeBall.position.x * this._cellSize + activeBall.position.x * this._delimiterSize + this._cellInnerOffset,
-				y: this._outerOffsetY + this._innerOffset + activeBall.position.y * this._cellSize + activeBall.position.y * this._delimiterSize + this._cellInnerOffset,
+				x: this._outerOffsetX + this._innerOffset + activeBall.position.x * this._cellSize + activeBall.position.x * this._delimiterSize + cellInnerOffset,
+				y: this._outerOffsetY + this._innerOffset + activeBall.position.y * this._cellSize + activeBall.position.y * this._delimiterSize + cellInnerOffset,
 			}
 			this._drawBall(activeBall.colors, position);
 		}
 	}
 	
 	_drawPreparedBalls() {
-		let ctx = this._ctx;
+		const ctx = this._ctx;
 		let model = this._model;
 
 		const nextPreparedColors = model.getNextPreparedColors();
@@ -111,8 +110,9 @@ class GameRenderer {
 			const cellCornerRadius = this._cellSize * 0.36;
 			this._drawRoundedRect(x, y, this._cellSize, this._cellSize, cellCornerRadius);
 	
-			x += this._cellInnerOffset;
-			y += this._cellInnerOffset;
+			const cellInnerOffset = (this._cellSize - this._ballSize) / 2;
+			x += cellInnerOffset;
+			y += cellInnerOffset;
 	
 			const colors = model.getColors(key);
 			this._drawBall(colors, { x, y })
@@ -120,12 +120,11 @@ class GameRenderer {
 	}
 
 	_drawScore() {
-		let ctx = this._ctx;
+		const ctx = this._ctx;
 		let model = this._model;
 
 		const score = model.getScore();
 		const textSize = this._outerOffsetY * 0.38;
-
 		ctx.font = `${textSize}px LuckiestGuy`;
 		let text = ctx.measureText(score);
 		ctx.fillStyle = 'white';
@@ -133,12 +132,11 @@ class GameRenderer {
 	}
 
 	_drawBall(colors, position) {
-		let ctx = this._ctx;
+		const ctx = this._ctx;
 
 		const { x, y } = position;
-	
 		const ballGradientOffset = this._ballSize * 0.33;
-		let gradient = ctx.createRadialGradient(x + ballGradientOffset, y + ballGradientOffset, 0, x + ballGradientOffset, y + ballGradientOffset, this._ballSize * 0.72)
+		const gradient = ctx.createRadialGradient(x + ballGradientOffset, y + ballGradientOffset, 0, x + ballGradientOffset, y + ballGradientOffset, this._ballSize * 0.72)
 		gradient.addColorStop(0, colors[0]);
 		gradient.addColorStop(.5, colors[1]);
 		gradient.addColorStop(1, colors[2]);
@@ -147,7 +145,7 @@ class GameRenderer {
 	}
 
 	_drawRoundedRect(x, y, width, height, radius) {
-		let ctx = this._ctx;
+		const ctx = this._ctx;
 
 		ctx.beginPath();
 		ctx.moveTo(x, y + radius);
