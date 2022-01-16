@@ -4,13 +4,15 @@ class GameModel {
 		this._spawnBallAtTime = spawnBallAtTime;
 		this._minSequenceLength = minSequenceLength;
 		this._scorePerBall = scorePerBall;
-		
-		this._score = 0;
-		this._activeBall = null;
-		this._activeBallSpeed = 0.2;
-		this._nextPreparedColors = [];
-		this._ballsKeys = Object.keys(GameModel.BALLS);
+
 		this._field = this._buildField();
+		this._score = 0;
+		this._selectedBall = null;
+		this._newSpawnedBalls = [];
+		this._nextPreparedColors = [];
+
+		this._animations = [];
+		
 		this._spawnBalls();
 	}
 
@@ -18,8 +20,8 @@ class GameModel {
 		return this._field;
 	}
 
-	getActiveBall() {
-		return this._activeBall;
+	getSelectedBall() {
+		return this._selectedBall;
 	}
 
 	getScore() {
@@ -34,10 +36,14 @@ class GameModel {
 		return GameModel.BALLS[key];
 	}
 
+	getAnimations() {
+		return this._animations;
+	}
+
 	_buildField() {
 		const field = [];
 		for (let i = 0; i < this._fieldLength; i++) {
-			let row = [];
+			const row = [];
 			for (let j = 0; j < this._fieldLength; j++) {
 				row.push('-');
 			}
@@ -47,10 +53,11 @@ class GameModel {
 	}
 
 	_prepareBallColors() {
+		const ballsKeys = Object.keys(GameModel.BALLS);
 		const ballColors = [];
 	
 		do {
-			ballColors.push(this._ballsKeys[this._getRandomFromRange(0, this._ballsKeys.length)]);
+			ballColors.push(ballsKeys[this._getRandomFromRange(0, ballsKeys.length)]);
 		} while (ballColors.length < this._spawnBallAtTime)
 	
 		return ballColors;
@@ -60,82 +67,76 @@ class GameModel {
 		let freePositions = this._getFreePositions();
 		const ballsToSpawnCounter = freePositions.length < this._spawnBallAtTime ? freePositions.length : this._spawnBallAtTime;
 
+		const ballsKeys = Object.keys(GameModel.BALLS);
 		const ballsToSpawn = [];
 		do {
-			const key = this._nextPreparedColors.length ? this._nextPreparedColors.shift() : this._ballsKeys[this._getRandomFromRange(0, this._ballsKeys.length)];
+			const key = this._nextPreparedColors.length ? this._nextPreparedColors.shift() : ballsKeys[this._getRandomFromRange(0, ballsKeys.length)];
+			const colors = GameModel.BALLS[key];
 			const position = freePositions[this._getRandomFromRange(0, freePositions.length)];
-			ballsToSpawn.push({ key, position });
-			freePositions = freePositions.filter(freePosition => !this._positionsAreEqual(freePosition, position))
+			const scaleFactor = 0;
+			ballsToSpawn.push({ key, colors, position, scaleFactor });
+			freePositions = freePositions.filter(freePosition => !this._positionsAreEqual(freePosition, position));
 		} while (ballsToSpawn.length < ballsToSpawnCounter)
 
-		ballsToSpawn.forEach((ball) => {
-			this._markPosition(ball.position, ball.key);
+		ballsToSpawn.forEach((ball, index) => {
+			const type = Animation.TYPES[1];
+			const elem = ball;
+			const path = [0, 1.2, 1];
+			const duration = path.length * 150;
+			const delay = index * 50;
+			const onEnd = function() {
+				this._markPosition(elem.position, elem.key);
+				this._newSpawnedBalls.push(elem.position);
+				if (this._animations.find(animation => animation.getType() === Animation.TYPES[1] && !animation.getEnded())) return;
+				this._clearSequences(this._newSpawnedBalls.map(position => position));
+				this._newSpawnedBalls.length = 0;
+			}
+			const onUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
+				elem.scaleFactor = currentStep + ((nextStep - currentStep) * currentStepProgress);
+			}
+			this._animations.push(new Animation(type, elem, path, duration, delay, onUpdate, onEnd.bind(this)));
 		})
-		this._clearSequences(ballsToSpawn.map(ball => ball.position))
+
 		this._nextPreparedColors = this._prepareBallColors();
 	}
 
-	update() {
-		this._updateActiveBallPosition();
+	update(timestamp) {
+		this._updateAnimations(timestamp);
 	}
-	
-	_updateActiveBallPosition() {
-		if (!this._activeBall || !this._activeBall.path) {
-			return;
-		}
-		const targetPosition = this._activeBall.path[0];
-		const direction = {
-			x: (targetPosition.x - this._activeBall.position.x).toFixed(1),
-			y: (targetPosition.y - this._activeBall.position.y).toFixed(1)
-		}
-		for (let axis in direction) {
-			if (Math.abs(direction[axis]) <= this._activeBallSpeed) {
-				this._activeBall.position[axis] = targetPosition[axis];
-			} else {
-				this._activeBall.position[axis] += direction[axis] * this._activeBallSpeed;
-			}	
-		}
-		if (this._positionsAreEqual(this._activeBall.position, targetPosition)) {
-			this._activeBall.path = this._activeBall.path.slice(1);
-		}
-	
-		if (this._activeBall.path.length > 0) {
-			return;
-		}
-		const deselectedBall = this._deselectBall();
-		const clearedSequence = this._clearSequences([deselectedBall.position]);
-		if (clearedSequence.length === 0) {
-			this._spawnBalls();
-		}
+
+	_updateAnimations(timestamp) {
+		if (!this._animations.length) return;
+		
+		this._animations.forEach((animation) => {
+			if (!animation.getRunning()) {
+				animation.start(timestamp);
+				return;
+			}
+			animation.update(timestamp);
+			if (animation.getEnded()) {
+				animation.onEnd && animation.onEnd();
+			}
+		})
+
+		this._animations = this._animations.filter(animation => !animation.getEnded());
 	}
 
 	_increaseScore(ballsCounter) {
 		this._score += ballsCounter * this._scorePerBall;
 	}
-
-	_deselectBall() {
-		const deselectedBall = Object.assign({}, this._activeBall);
-		this._markPosition(this._activeBall.position, this._activeBall.key);
-		this._activeBall = null;
-		return deselectedBall;
-	}
 	
 	_selectBall(position) {
 		const key = this._field[position.y][position.x];
-		this._activeBall = {
-			key,
-			colors: GameModel.BALLS[key],
-			position,
-			path: null,
-		};
-		this._markPosition(position, '-');
+		const colors = GameModel.BALLS[key];
+		const scaleFactor = 1;
+		this._selectedBall = { key, colors, position, scaleFactor };
 	}
 
 	_findPath(from, to) {
 		const directions = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x:-1, y: 0 }];
 		
 		let path = null;
-		const steps = [{ position: from, path: []}];
+		const steps = [{ position: from, path: [from]}];
 		const viewedPositions = [from];
 		
 		do {
@@ -165,9 +166,7 @@ class GameModel {
 			axes.forEach((axis) => {
 	
 				const sequence = this._findSequenceFromPosition(position, axis);
-				if (sequence.length < this._minSequenceLength) {
-					return;
-				}
+				if (sequence.length < this._minSequenceLength) return;
 				sequence.forEach((position) => {
 					if (!this._arrIncludesPosition(sequences, position)) {
 						sequences.push(position);
@@ -176,21 +175,57 @@ class GameModel {
 			})
 		})
 
-		sequences.forEach((position) => {
+		sequences.forEach((position, index) => {
+			const type = Animation.TYPES[2];
+			const key = this._field[position.y][position.x];
+			const colors = GameModel.BALLS[key];
+			const scaleFactor = 1;
+			const elem = { key, colors, position, scaleFactor };
+			const path = [1, 1.2, 0];
+			const duration = path.length * 150;
+			const delay = index * 50;
+			const onUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
+				elem.scaleFactor = currentStep + ((nextStep - currentStep) * currentStepProgress);
+			}
+			
+ 			this._animations.push(new Animation(type, elem, path, duration, delay, onUpdate));
 			this._markPosition(position, '-');
 		})
+		
 		this._increaseScore(sequences.length);
 		return sequences;
 	}
 
  	handleClick(position) {
-		if (this._positionIsAvailable(position) && this._activeBall) {
-			this._activeBall.path = this._findPath(this._activeBall.position, position);
-		} else if (!this._positionIsAvailable(position) && this._activeBall) {
-			this._deselectBall();
+		if (!this._positionIsAvailable(position)) {
 			this._selectBall(position);
-		} else if (!this._positionIsAvailable(position)) {
-			this._selectBall(position);
+			return;
+		} else if (!this._selectedBall) {
+			return;
+		}
+		
+		const path = this._findPath(this._selectedBall.position, position);
+		if (path) {
+			const type = Animation.TYPES[0];
+			const elem = Object.assign({}, this._selectedBall);
+			const duration = path.length * 75;
+			const delay = 0;
+ 			const onEnd = function() {
+				this._markPosition(elem.position, elem.key);
+				const clearedSequence = this._clearSequences([elem.position]);
+				if (!clearedSequence.length) {
+					this._spawnBalls();
+				}
+			}
+			const onUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
+				elem.position = {
+					x: currentStep.x + ((nextStep.x - currentStep.x) * currentStepProgress),
+					y: currentStep.y + ((nextStep.y - currentStep.y) * currentStepProgress)
+				};
+			}
+			this._animations.push(new Animation(type, elem, path, duration, delay, onUpdate, onEnd.bind(this)));
+			this._markPosition(this._selectedBall.position, '-');
+			this._selectedBall = null;
 		}
 	}
 
@@ -198,9 +233,7 @@ class GameModel {
 		const freePositions = [];
 		this._field.forEach((row, y) => {
 			row.forEach((position, x) => {
-				if (position !== '-') {
-					return;
-				}
+				if (position !== '-') return;
 				freePositions.push({ x, y });
 			})
 		})
@@ -235,9 +268,7 @@ class GameModel {
 			const position = queue.shift();
 			axisDirections.forEach((direction) => {
 				const nextPosition = { x: position.x + direction.offset.x, y: position.y + direction.offset.y };
-				if (!this._positionExist(nextPosition) || this._arrIncludesPosition(sequence, nextPosition) || this._field[nextPosition.y][nextPosition.x] !== sequenceKey) {
-					return;
-				}
+				if (!this._positionExist(nextPosition) || this._arrIncludesPosition(sequence, nextPosition) || this._field[nextPosition.y][nextPosition.x] !== sequenceKey) return;
 				sequence.push(nextPosition);
 				queue.push(nextPosition);
 			})		
@@ -256,7 +287,7 @@ class GameModel {
 	}
 	
 	_positionIsAvailable(position) {
-		return this._positionExist(position) && this._field[position.y][position.x] === '-' && (!this._activeBall|| !this._positionsAreEqual(position, this._activeBall.position));
+		return this._positionExist(position) && this._field[position.y][position.x] === '-';
 	}
 	
 	_positionExist(position) {

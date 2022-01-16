@@ -38,9 +38,8 @@ class Game {
 		);
 		this._addEventHandlers();
 		this._startGame();
-
-		this._prevTimestamp = 0;
 		this._diff = 0;
+		this._prevTimestamp = 0;
 		this._fps = 0;
 	}
 
@@ -55,7 +54,7 @@ class Game {
 		this._fps = Math.round(1000 / this._diff);
 		this._prevTimestamp = timestamp;
 
-		this._model.update();
+		this._model.update(timestamp);
 		this._renderer.render();
 		requestAnimationFrame((newTimestamp) => {
 			this._gameLoop(newTimestamp);
@@ -94,17 +93,16 @@ class Game {
 		this._innerOffset = this._fieldSize * 0.018;
 		this._delimiterSize = this._fieldSize * 0.007;
 		this._cellSize = (this._fieldSize - this._innerOffset * 2 - this._delimiterSize * (this._fieldLength - 1)) / this._fieldLength;
-		this._ballSize = this._fieldSize * 0.075;
+		this._ballSize = this._cellSize * 0.75;
 	}
 
  	_handleClick(event) {
+		if (this._model.getAnimations().length) return;
  		const borderTop = this._outerOffsetY + this._innerOffset;
 		const borderRight = this._outerOffsetX + this._innerOffset + this._cellSize * this._fieldLength + this._delimiterSize * (this._fieldLength - 1);
 		const borderBottom = this._outerOffsetY + this._innerOffset + this._cellSize * this._fieldLength + this._delimiterSize * (this._fieldLength - 1);
 		const borderLeft = this._outerOffsetX + this._innerOffset;
-		if (event.offsetX < borderLeft || event.offsetX > borderRight || event.offsetY < borderTop || event.offsetY > borderBottom) {
-			return;
-		}
+		if (event.offsetX < borderLeft || event.offsetX > borderRight || event.offsetY < borderTop || event.offsetY > borderBottom) return;
 
 		const x = Math.floor((event.offsetX - this._outerOffsetX - this._innerOffset) / (this._cellSize + this._delimiterSize));
 		const y = Math.floor((event.offsetY - this._outerOffsetY - this._innerOffset) / (this._cellSize + this._delimiterSize));
