@@ -8,10 +8,12 @@ class GameModel {
 		this._field = this._buildField();
 		this._score = 0;
 		this._selectedBall = null;
+		this._ballMoveSpeed = 75;
+		this._ballScalingSpeed = 150;
 		this._newSpawnedBalls = [];
 		this._nextPreparedColors = [];
 
-		this._animations = [];
+		this._ballsAnimations = [];
 		
 		this._spawnBalls();
 	}
@@ -36,8 +38,14 @@ class GameModel {
 		return GameModel.BALLS[key];
 	}
 
+	getBallsAnimations() {
+		return this._ballsAnimations;
+	}
+
 	getAnimations() {
-		return this._animations;
+		return [
+			this._ballsAnimations
+		].flat();
 	}
 
 	_buildField() {
@@ -82,32 +90,32 @@ class GameModel {
 			const type = Animation.TYPES[1];
 			const elem = ball;
 			const path = [0, 1.2, 1];
-			const duration = path.length * 150;
+			const duration = path.length * this._ballScalingSpeed;
 			const delay = index * 50;
 			const onEnd = function() {
 				this._markPosition(elem.position, elem.key);
 				this._newSpawnedBalls.push(elem.position);
-				if (this._animations.find(animation => animation.getType() === Animation.TYPES[1] && !animation.getEnded())) return;
+				if (this._ballsAnimations.find(animation => animation.getType() === Animation.TYPES[1] && !animation.getEnded())) return;
 				this._clearSequences(this._newSpawnedBalls.map(position => position));
 				this._newSpawnedBalls.length = 0;
 			}
-			const onUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
+			const setUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
 				elem.scaleFactor = currentStep + ((nextStep - currentStep) * currentStepProgress);
 			}
-			this._animations.push(new Animation(type, elem, path, duration, delay, onUpdate, onEnd.bind(this)));
+			this._ballsAnimations.push(new Animation(type, elem, path, duration, delay, setUpdate, onEnd.bind(this)));
 		})
 
 		this._nextPreparedColors = this._prepareBallColors();
 	}
 
 	update(timestamp) {
-		this._updateAnimations(timestamp);
+		this._updateBallsAnimations(timestamp);
 	}
 
-	_updateAnimations(timestamp) {
-		if (!this._animations.length) return;
+	_updateBallsAnimations(timestamp) {
+		if (!this._ballsAnimations.length) return;
 		
-		this._animations.forEach((animation) => {
+		this._ballsAnimations.forEach((animation) => {
 			if (!animation.getRunning()) {
 				animation.start(timestamp);
 				return;
@@ -118,7 +126,7 @@ class GameModel {
 			}
 		})
 
-		this._animations = this._animations.filter(animation => !animation.getEnded());
+		this._ballsAnimations = this._ballsAnimations.filter(animation => !animation.getEnded());
 	}
 
 	_increaseScore(ballsCounter) {
@@ -182,13 +190,13 @@ class GameModel {
 			const scaleFactor = 1;
 			const elem = { key, colors, position, scaleFactor };
 			const path = [1, 1.2, 0];
-			const duration = path.length * 150;
+			const duration = path.length * this._ballScalingSpeed;
 			const delay = index * 50;
-			const onUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
+			const setUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
 				elem.scaleFactor = currentStep + ((nextStep - currentStep) * currentStepProgress);
 			}
 			
- 			this._animations.push(new Animation(type, elem, path, duration, delay, onUpdate));
+ 			this._ballsAnimations.push(new Animation(type, elem, path, duration, delay, setUpdate));
 			this._markPosition(position, '-');
 		})
 		
@@ -208,7 +216,7 @@ class GameModel {
 		if (path) {
 			const type = Animation.TYPES[0];
 			const elem = Object.assign({}, this._selectedBall);
-			const duration = path.length * 75;
+			const duration = path.length * this._ballMoveSpeed;
 			const delay = 0;
  			const onEnd = function() {
 				this._markPosition(elem.position, elem.key);
@@ -217,13 +225,13 @@ class GameModel {
 					this._spawnBalls();
 				}
 			}
-			const onUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
+			const setUpdate = function(elem, currentStep, nextStep, currentStepProgress) {
 				elem.position = {
 					x: currentStep.x + ((nextStep.x - currentStep.x) * currentStepProgress),
 					y: currentStep.y + ((nextStep.y - currentStep.y) * currentStepProgress)
 				};
 			}
-			this._animations.push(new Animation(type, elem, path, duration, delay, onUpdate, onEnd.bind(this)));
+			this._ballsAnimations.push(new Animation(type, elem, path, duration, delay, setUpdate, onEnd.bind(this)));
 			this._markPosition(this._selectedBall.position, '-');
 			this._selectedBall = null;
 		}

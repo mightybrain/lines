@@ -73,15 +73,11 @@ class GameRenderer {
 		const model = this._model;
 
 		const field = model.getField();
-		const cellInnerOffset = (this._cellSize - this._ballSize) / 2;
 		field.forEach((row, y) => {
 			row.forEach((key, x) => {
 				if (key === '-') return;
 				const colors = model.getColors(key);
-				const position = {
-					x: this._outerOffsetX + this._innerOffset + x * this._cellSize + x * this._delimiterSize + cellInnerOffset,
-					y: this._outerOffsetY + this._innerOffset + y * this._cellSize + y * this._delimiterSize + cellInnerOffset,
-				};
+				const position = this._transformBallPosition({ x, y }, this._ballSize);
 				this._drawBall(colors, position, this._ballSize);
 			})
 		})
@@ -122,16 +118,16 @@ class GameRenderer {
 	}
 
 	_drawAnimations() {
-		const animations = this._model.getAnimations();
+		this._drawBallsAnimations();
+	}
+
+	_drawBallsAnimations() {
+		const animations = this._model.getBallsAnimations();
 
 		animations.forEach((animation) => {
 			const elem = animation.getElem();
 			const ballSize = this._ballSize * elem.scaleFactor;
-			const cellInnerOffset = (this._cellSize - ballSize) / 2;
-			const position = {
-				x: this._outerOffsetX + this._innerOffset + elem.position.x * this._cellSize + elem.position.x * this._delimiterSize + cellInnerOffset,
-				y: this._outerOffsetY + this._innerOffset + elem.position.y * this._cellSize + elem.position.y * this._delimiterSize + cellInnerOffset,
-			}
+			const position = this._transformBallPosition(elem.position, ballSize);
 			this._drawBall(elem.colors, position, ballSize);
 		})
 	}
@@ -160,5 +156,13 @@ class GameRenderer {
 		ctx.arcTo(x + width, y, x + width - radius, y, radius);
 		ctx.arcTo(x, y, x, y + radius, radius);
 		ctx.fill();
+	}
+
+	_transformBallPosition(position, ballSize) {
+		const cellInnerOffset = (this._cellSize - ballSize) / 2;
+		return {
+			x: this._outerOffsetX + this._innerOffset + position.x * this._cellSize + position.x * this._delimiterSize + cellInnerOffset,
+			y: this._outerOffsetY + this._innerOffset + position.y * this._cellSize + position.y * this._delimiterSize + cellInnerOffset,
+		}
 	}
 }

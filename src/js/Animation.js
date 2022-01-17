@@ -1,11 +1,11 @@
 class Animation {
-  constructor(type, elem, path, duration, delay, onUpdate, onEnd) {
+  constructor(type, elem, path, duration, delay, setUpdate, onEnd) {
     this._type = type;
     this._elem = elem;
     this._path = path;
     this._duration = duration;
     this._delay = delay || 0;
-    this._onUpdate = onUpdate;
+    this._setUpdate = setUpdate;
     this.onEnd = onEnd || null;
 
     this._startTime = 0;
@@ -40,7 +40,7 @@ class Animation {
     const pathProgress = this._getPathProgress(timeProgress);
     const { currentStep, nextStep, currentStepProgress } = pathProgress;
 
-    this._onUpdate(this._elem, currentStep, nextStep, currentStepProgress);
+    this._setUpdate(this._elem, currentStep, nextStep, currentStepProgress);
 
     this._ended = timeProgress === 100;
   }
