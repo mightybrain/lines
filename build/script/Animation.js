@@ -39,7 +39,7 @@ class Animation {
     timeProgress = timeProgress > 100 ? 100 : timeProgress;
     const pathProgress = this._getPathProgress(timeProgress);
     const { currentStep, nextStep, currentStepProgress } = pathProgress;
-
+    
     this._setUpdate(this._elem, currentStep, nextStep, currentStepProgress);
 
     this._ended = timeProgress === 100;
@@ -64,7 +64,7 @@ class Animation {
 }
 
 Animation.TYPES = [
-  'move ball',
-  'scale in ball',
-  'scale out ball'
+  'ball move',
+  'ball spawn',
+  'ball destroy'
 ]
