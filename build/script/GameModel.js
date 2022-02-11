@@ -21,14 +21,14 @@ class GameModel {
 		this._setScore();
 		this._setScoreSize();
 
+		this._selectedBall = null;
+		this._newSpawnedBalls = [];
+		this._ballsAnimations = [];
+
 		this._preparedBalls = null;
 		this._setPreparedBalls();
 		this._setPreparedBallsSize();
 		this._prepareBalls();
-
-		this._selectedBall = null;
-		this._newSpawnedBalls = [];
-		this._ballsAnimations = [];
 		
 		this._spawnBalls();
 	}
@@ -226,7 +226,7 @@ class GameModel {
 			const key = this._ballsKeys[this._getRandomFromRange(0, this._ballsKeys.length)];
 			const colors = GameModel.BALLS[key];
 			const size = ballSize;
-			const scaleFactor = 1;
+			const scaleFactor = 0;
 			const coords = null;
 			const position = {
 				x: preparedBalls.areaPosition.x + preparedBalls.areaHeight * 0.12 + (preparedBalls.areaHeight * 0.12 + ballSize) * i,
@@ -234,6 +234,22 @@ class GameModel {
 			};
 			const ball = { key, colors, size, scaleFactor, position, coords };
 			preparedBalls.balls.push(ball);
+
+			/*const type = Animation.TYPES[1];
+			const path = [0, 1.2, 1];
+			const duration = path.length * this._ballsSpawnSpeed;
+			const delay = i * 50;
+			const onEnd = function() {
+				this._preparedBalls.balls.push(ball);
+			}
+			const setUpdate = function(ball, currentStep, nextStep, currentStepProgress) {
+				ball.scaleFactor = currentStep + ((nextStep - currentStep) * currentStepProgress);
+				ball.position = {
+					x: preparedBalls.areaPosition.x + preparedBalls.areaHeight * 0.12 + (preparedBalls.areaHeight * 0.12 + ballSize) * i,
+					y: preparedBalls.areaPosition.y + preparedBalls.areaHeight / 2 - ballSize / 2,
+				};
+			}
+			this._ballsAnimations.push(new Animation(type, ball, path, duration, delay, setUpdate.bind(this), onEnd.bind(this)));*/
 		}
 	}
 
@@ -461,6 +477,7 @@ class GameModel {
 	}
 
 	_coordsAreEqual(a, b) {
+		if (!a || !b) return false;
 		return a.x === b.x && a.y === b.y;
 	}
 
@@ -479,12 +496,12 @@ class GameModel {
 		this._field.map[y][x].ball = ball;
 	}
 
-	_coordsIsAvailable(position) {
-		return this._coordsExist(position) && !this._field.map[position.y][position.x].ball;
+	_coordsIsAvailable(coords) {
+		return this._coordsExist(coords) && !this._field.map[coords.y][coords.x].ball && !this._coordsAreEqual(this._selectedBall?.coords, coords);
 	}
 
-	_coordsExist(position) {
-		return position.x >= 0 && position.x < this._fieldLength && position.y >= 0 && position.y < this._fieldLength;
+	_coordsExist(coords) {
+		return coords.x >= 0 && coords.x < this._fieldLength && coords.y >= 0 && coords.y < this._fieldLength;
 	}
 	
 	_arrIncludesCoords(arr, coords) {

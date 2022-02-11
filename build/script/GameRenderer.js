@@ -17,10 +17,11 @@ class GameRenderer {
 		this._drawBackground();
 		this._drawField();
  		this._drawBalls();
-		this._drawAnimations();
 
 		this._drawScore();
 		this._drawPreparedBalls();
+
+		this._drawAnimations();
 	}
 
 	_clearCanvas() {
