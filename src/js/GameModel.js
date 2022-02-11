@@ -173,7 +173,7 @@ class GameModel {
 		const scoreText = this._ctx.measureText(score.value);
 
 		score.icon = new Image();
-		score.icon.src = './images/coin.png';
+		score.icon.src = './build/images/coin.png';
 		score.iconSize = score.areaHeight * 0.77;
 		
 		score.areaWidth = scoreText.width + score.areaHeight * 0.49 + score.iconSize;
