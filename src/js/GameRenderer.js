@@ -4,7 +4,6 @@ class GameRenderer {
 		this._model = model;
 		this._rendererWidth = rendererWidth;
 		this._rendererHeight = rendererHeight;
-		this._colors = Object.keys(GameRenderer.COLORS);
 	}
 
 	setSize(rendererWidth, rendererHeight) {
@@ -21,7 +20,7 @@ class GameRenderer {
 		this._drawScore();
 		this._drawPreparedBalls();
 
-		this._drawAnimations();
+		this._drawRenderableAnimations();
 	}
 
 	_clearCanvas() {
@@ -93,12 +92,12 @@ class GameRenderer {
 		this._drawRoundedRect(x, y, ballSize, ballSize, ballSize / 2);
 	}
 
-	_drawAnimations() {
+	_drawRenderableAnimations() {
 		this._drawBallsAnimations();
 	}
 
 	_drawBallsAnimations() {
-		const animations = this._model.getBallsAnimations();
+		const animations = this._model.getRenderableAnimations().filter(animation => animation.getType().includes('ball'));
 
 		animations.forEach((animation) => {
 			const elem = animation.getElem();
@@ -137,8 +136,8 @@ class GameRenderer {
 		this._drawRoundedRect(areaPosition.x, areaPosition.y, areaWidth, areaHeight, areaCornerRadius);
 
 		preparedBalls.balls.forEach((ball) => {
-			const { colors, position, size } = ball;
-			this._drawBall(colors, position, size);
+			const { colors, position, size, scaleFactor } = ball;
+			this._drawBall(colors, position, size * scaleFactor);
 		})
 	}
 
@@ -153,8 +152,4 @@ class GameRenderer {
 		ctx.arcTo(x, y, x, y + radius, radius);
 		ctx.fill();
 	}
-}
-
-GameRenderer.COLORS = {
-	green: '#4DAF34'
 }
