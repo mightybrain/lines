@@ -30,7 +30,7 @@ gulp.task("html:build", function(){
 });
 
 gulp.task("js:build", function(){
-    return gulp.src("src/js/*.js")
+    return gulp.src("src/js/**/*.js")
         .pipe(rigger())
         .pipe(gulp.dest("build/script"))
         .pipe(server.stream());
