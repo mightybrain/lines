@@ -1,13 +1,21 @@
 class Ball {
-  constructor({ color, size, position }) {
-		this._spawnSpeed = 150;
-		this._destroySpeed = 150;
-		this._moveSpeed = 75;
-
+  constructor({ color, size, position, stepSize }) {
+		this._stepSize = stepSize;
 		this._color = color;
 		this._position = position;
 		this._size = size;
+
+		this._stepSizeCommon = this._stepSize.common;
   }
+
+	setSize() {
+		const coordX = this._position.x / this._stepSizeCommon;
+		const coordY = this._position.y / this._stepSizeCommon;
+		this._position.x = coordX * this._stepSize.common;
+		this._position.y = coordY * this._stepSize.common;
+		this._stepSizeCommon = this._stepSize.common;
+		this._size = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
+	}
 
 	render(ctx) {
 		const ballGradientOffset = this._size * 0.33;
