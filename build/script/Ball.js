@@ -1,20 +1,18 @@
 class Ball {
-  constructor({ color, size, position, stepSize }) {
-		this._stepSize = stepSize;
+  constructor({ key, color, size, position }) {
+		this._key = key;
 		this._color = color;
 		this._position = position;
 		this._size = size;
-
-		this._stepSizeCommon = this._stepSize.common;
   }
 
-	setSize() {
-		const coordX = this._position.x / this._stepSizeCommon;
-		const coordY = this._position.y / this._stepSizeCommon;
-		this._position.x = coordX * this._stepSize.common;
-		this._position.y = coordY * this._stepSize.common;
-		this._stepSizeCommon = this._stepSize.common;
-		this._size = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
+	setSize(size) {
+		this._size = size;
+	}
+
+	setPosition(position) {
+		this._position.x = position.x;
+		this._position.y = position.y;
 	}
 
 	render(ctx) {
@@ -25,6 +23,15 @@ class Ball {
 		gradient.addColorStop(1, this._color[2]);
 		ctx.fillStyle = gradient;
 		renderRoundedRect(ctx, this._position.x, this._position.y, this._size, this._size, this._size / 2);
+	}
+
+	getProps() {
+		return {
+			key: this._key,
+			color: this._color,
+			size: this._size,
+			position: this._position,
+		}
 	}
 }
 

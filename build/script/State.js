@@ -9,8 +9,8 @@ class State {
     this._totalScore = 0;
   }
 
-  setTotalScore() {
-
+  setTotalScore(score) {
+    this._totalScore = score;
   }
 
   getTotalScore() {

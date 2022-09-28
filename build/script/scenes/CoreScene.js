@@ -6,9 +6,6 @@ class CoreScene {
     this._stepSize = stepSize;
     this._state = state;
 
-    this._scorePerBall = 1;
-    this._minSequenceLength = 5;
-
     this._score = new Score({
       canvasSize: this._canvasSize,
       stepSize: this._stepSize,
@@ -22,9 +19,13 @@ class CoreScene {
 		this._field = new Field({
       canvasSize: this._canvasSize,
       stepSize: this._stepSize,
+      score: this._score,
+      queue: this._queue,
+      state: this._state,
     });
 
     this._queue.prepareBalls();
+    this._field.spawnBalls();
   }
 
   setSize() {
@@ -52,5 +53,9 @@ class CoreScene {
 
   handleKeyDown(code) {
     
+  }
+
+  handleClick(event) {
+    this._field.handleClick(event);
   }
 }

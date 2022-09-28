@@ -28,4 +28,8 @@ class MainScene {
     
   }
 
+  handleClick(event) {
+    
+  }
+
 }

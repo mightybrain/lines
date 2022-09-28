@@ -30,6 +30,14 @@ class Score {
     })
   }
 
+	addNewPoints(points) {
+		this._newScore += points;
+	}
+	
+	getCurrentScore() {
+		return this._currentScore;
+	}
+
   update(time) {
 		const { timestamp } = time;
 

@@ -77,6 +77,9 @@ class Game {
 		window.addEventListener('keydown', event => {
 			if (!event.repeat) this._sceneManager.handleKeyDown(event);
 		})
+		window.addEventListener('click', event => {
+			this._sceneManager.handleClick(event);
+		})
 	}
 
 	_setSize() {

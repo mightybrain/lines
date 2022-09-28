@@ -24,7 +24,15 @@ class Queue {
 		this._areaSize.width = this._stepSize.common * 8 + this._spawnBallsAtTime * this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
 		this._areaSize.height = this._stepSize.common * Queue.AREA_HEIGHT_SCALE_FACTOR;
 		this._areaCornerRadius = this._stepSize.common * Queue.AREA_CORNER_SCALE_FACTOR;
-		this._queue.forEach(ball => ball.setSize());
+		this._queue.forEach((ball, index) => {
+			const ballSize = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
+			const ballPosition = {
+				x: this._areaPosition.x + this._stepSize.common * 2 * (index + 1) + index * ballSize,
+				y: this._areaPosition.y + this._areaSize.height / 2 - ballSize / 2,
+			};
+			ball.setSize(ballSize);
+			ball.setPosition(ballPosition);
+		});
 	}
 
   render(ctx) {
@@ -34,24 +42,32 @@ class Queue {
 		this._queue.forEach(ball => ball.render(ctx));
   }
 
+	getQueue() {
+		return this._queue.slice();
+	}
+
+	clearQueue() {
+		this._queue = [];
+	}
+
 	prepareBalls() {
 		for(let i = 0; i < this._spawnBallsAtTime; i++) {
-			const color = this._getRandomBallColor();
+			const key = this._getRandomBallKey();
+			const color = Ball.COLORS[key];
 			const size = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
 			const position = {
-				x: this._areaPosition.x + this._stepSize.common * 2 * (this._queue.length + 1)  + this._queue.length * size,
+				x: this._areaPosition.x + this._stepSize.common * 2 * (this._queue.length + 1) + this._queue.length * size,
 				y: this._areaPosition.y + this._areaSize.height / 2 - size / 2,
 			};
-			const ball = new Ball({ color, size, position, stepSize: this._stepSize });
+			const ball = new Ball({ key, color, size, position });
 			this._queue.push(ball);
 		}
 	}
 
-	_getRandomBallColor() {
+	_getRandomBallKey() {
     const keys = Object.keys(Ball.COLORS);
     const index = getRandomFromRange(0, keys.length);
-		const key = keys[index];
-		return Ball.COLORS[key];
+		return keys[index];
 	}
 }
 

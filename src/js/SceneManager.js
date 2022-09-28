@@ -5,7 +5,7 @@ class SceneManager {
     this._currentScene = null;
     this._futureScene = null;
     
-    this._duration = .5;
+    this._duration = 0.5;
     this._opacity = 0;
   }
 
@@ -55,4 +55,10 @@ class SceneManager {
 
     if (this._currentScene) this._currentScene.handleKeyUp(event.code);
 	}
+
+  handleClick(event) {
+    if (this._futureScene || this._opacity) return;
+
+    if (this._currentScene) this._currentScene.handleClick(event);
+  }
 }

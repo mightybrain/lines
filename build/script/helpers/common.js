@@ -17,3 +17,7 @@ function calcTextMetrics(ctx, fontSize, text) {
 function getRandomFromRange(from, to) {
   return from === to ? from : from + Math.floor(Math.random() * (to - from));
 }
+
+function coordsAreEqual(a, b) {
+  return a.x === b.x && a.y === b.y;
+}
