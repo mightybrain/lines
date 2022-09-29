@@ -7,7 +7,7 @@ class ResultScene {
     this._state = state;
   }
 
-  update() {
+  update(time) {
 
   }
 
@@ -21,7 +21,7 @@ class ResultScene {
   }
 
   handleKeyUp(code) {
-
+    if (code === 'Enter') this._state.setMainScene();
   }
 
   handleKeyDown(code) {

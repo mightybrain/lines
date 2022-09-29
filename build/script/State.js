@@ -17,7 +17,7 @@ class State {
     
   }
 
-  setInitialScene() {
+  setMainScene() {
     this._sceneManager.setFutureScene(new MainScene({
       state: this,
       canvasSize: this._canvasSize,

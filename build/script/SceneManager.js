@@ -5,7 +5,6 @@ class SceneManager {
     this._currentScene = null;
     this._futureScene = null;
     
-    this._duration = 0.5;
     this._opacity = 0;
   }
 
@@ -18,9 +17,9 @@ class SceneManager {
       this._currentScene = this._futureScene;
       this._futureScene = null;
     } else if (this._futureScene && this._opacity < 1) {
-      this._opacity = Math.min(this._opacity + delta / this._duration, 1);
+      this._opacity = Math.min(this._opacity + delta / SceneManager.DURATION, 1);
     } else if (!this._futureScene && this._opacity > 0) {
-      this._opacity = Math.max(this._opacity - delta / this._duration, 0);
+      this._opacity = Math.max(this._opacity - delta / SceneManager.DURATION, 0);
     }
   }
 
@@ -62,3 +61,5 @@ class SceneManager {
     if (this._currentScene) this._currentScene.handleClick(event);
   }
 }
+
+SceneManager.DURATION = 0.5;

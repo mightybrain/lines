@@ -6,9 +6,6 @@ class Field {
 		this._queue = queue;
 		this._state = state;
 
-    this._scorePerBall = 1;
-    this._minSequenceLength = 5;
-
     this._map = [];
     this._setMap();
 
@@ -26,6 +23,10 @@ class Field {
     }
     this.setSize();
   }
+
+	update(time) {
+
+	}
 
 	_setMap() {
 		for (let y = 0; y < Field.CELLS_BY_SIDE_COUNTER; y++) {
@@ -115,7 +116,7 @@ class Field {
 		const sequences = this._findSequences(cells);
 		if (sequences.length) {
 			this._clearSequences(sequences.flat());
-			const points = sequences.flat().length;
+			const points = sequences.flat().length * Field.SCORE_PER_BALL;
 			this._score.addNewPoints(points);
 			freeCells = this._getFreeCells();
 		}
@@ -168,7 +169,7 @@ class Field {
 		const sequences = this._findSequences([to]);
 		if (sequences.length) {
 			this._clearSequences(sequences.flat());
-			const points = sequences.flat().length;
+			const points = sequences.flat().length * Field.SCORE_PER_BALL;
 			this._score.addNewPoints(points);
 		}
 
@@ -283,7 +284,7 @@ class Field {
 					})
 				} while (queue.length)
 		
-				if (sequence.length >= this._minSequenceLength) sequences.push(sequence);
+				if (sequence.length >= Field.MIN_SEQUENCE_LENGTH) sequences.push(sequence);
 			})
 		})
 
@@ -298,3 +299,5 @@ Field.CELLS_BETWEEN_SIZE_SCALE_FACTOR = 1;
 Field.CORNER_SCALE_FACTOR = 9;
 Field.CELL_CORNER_SCALE_FACTOR = 6;
 Field.CELLS_BY_SIDE_COUNTER = 9;
+Field.SCORE_PER_BALL = 1;
+Field.MIN_SEQUENCE_LENGTH = 5;

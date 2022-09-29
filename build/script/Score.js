@@ -19,7 +19,6 @@ class Score {
 		this._currentScore = 0;
 		this._newScore = 0
 		this._lastUpdateTimestamp = 0;
-		this._scoreSpeed = 100;
 
     this._loaded = false;
     this._sprite = new Image();
@@ -41,7 +40,7 @@ class Score {
   update(time) {
 		const { timestamp } = time;
 
-		if (this._newScore && timestamp - this._lastUpdateTimestamp > this._scoreSpeed) {
+		if (this._newScore && timestamp - this._lastUpdateTimestamp >= Score.UPDATE_SPEED) {
 			this._currentScore++;
 			this._newScore--;
 			this._lastUpdateTimestamp = timestamp;
@@ -90,3 +89,4 @@ Score.SPRITE_SIZE_SCALE_FACTOR = 10;
 Score.FONT_SIZE_SCALE_FACTOR = 10;
 Score.AREA_HEIGHT_SCALE_FACTOR = 16;
 Score.AREA_CORNER_SCALE_FACTOR = 6;
+Score.UPDATE_SPEED = 50;

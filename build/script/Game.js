@@ -45,7 +45,7 @@ class Game {
 	}
 
 	_startGame() {
-		this._state.setInitialScene();
+		this._state.setMainScene();
 
 		requestAnimationFrame(timestamp => {
 			this._gameLoop(timestamp);
@@ -88,8 +88,10 @@ class Game {
 		this._canvas.width = this._canvasSize.width;
 		this._canvas.height = this._canvasSize.height;
 
-		this._stepSize.common = this._canvasSize.width / Game.MAX_STEPS.x;
-		if (this._stepSize.common * Game.MAX_STEPS.y > this._canvasSize.height) this._stepSize.common = this._canvasSize.height / Game.MAX_STEPS.y;
+		//this._stepSize.common = this._canvasSize.width / Game.MAX_STEPS.x;
+		//if (this._stepSize.common * Game.MAX_STEPS.y > this._canvasSize.height) this._stepSize.common = this._canvasSize.height / Game.MAX_STEPS.y;
+		this._stepSize.common = this._canvasSize.height / Game.MAX_STEPS.y;
+		if (this._canvasSize.height > this._canvasSize.width) this._stepSize.common = this._canvasSize.width / Game.MAX_STEPS.x;
 
 		this._safeAreaSize.width = this._stepSize.common * Game.MAX_STEPS.x;
 		this._safeAreaSize.height = this._stepSize.common * Game.MAX_STEPS.y;
@@ -100,8 +102,11 @@ class Game {
 }
 
 Game.MAX_STEPS = {
-	x: 372,
-	y: 182,
+	//x: 372,
+	//x: 182,
+	//y: 182,
+	x: 160,
+	y: 160,
 }
 
 new Game(document.getElementById('lines'));

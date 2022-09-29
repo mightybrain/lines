@@ -36,6 +36,8 @@ class CoreScene {
 
   update(time) {
     this._score.update(time);
+    this._queue.update(time);
+    this._field.update(time);
   }
 
   render(ctx) {

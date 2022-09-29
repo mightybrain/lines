@@ -3,7 +3,6 @@ class Queue {
     this._canvasSize = canvasSize;
     this._stepSize = stepSize;
 
-    this._spawnBallsAtTime = 3;
     this._queue = [];
 
 		this._areaPosition = {
@@ -18,10 +17,14 @@ class Queue {
 		this.setSize();
   }
 
+	update(time) {
+
+	}
+
 	setSize() {
 		this._areaPosition.x = this._stepSize.common * 3;
 		this._areaPosition.y = this._stepSize.common * 3;
-		this._areaSize.width = this._stepSize.common * 8 + this._spawnBallsAtTime * this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
+		this._areaSize.width = this._stepSize.common * 8 + Queue.SPAWN_BALLS_AT_TIME * this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
 		this._areaSize.height = this._stepSize.common * Queue.AREA_HEIGHT_SCALE_FACTOR;
 		this._areaCornerRadius = this._stepSize.common * Queue.AREA_CORNER_SCALE_FACTOR;
 		this._queue.forEach((ball, index) => {
@@ -51,7 +54,7 @@ class Queue {
 	}
 
 	prepareBalls() {
-		for(let i = 0; i < this._spawnBallsAtTime; i++) {
+		for(let i = 0; i < Queue.SPAWN_BALLS_AT_TIME; i++) {
 			const key = this._getRandomBallKey();
 			const color = Ball.COLORS[key];
 			const size = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
@@ -73,3 +76,4 @@ class Queue {
 
 Queue.AREA_HEIGHT_SCALE_FACTOR = 16;
 Queue.AREA_CORNER_SCALE_FACTOR = 6;
+Queue.SPAWN_BALLS_AT_TIME = 3;

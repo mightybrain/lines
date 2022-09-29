@@ -46,3 +46,4 @@ Ball.COLORS = {
 }
 
 Ball.SIZE_SCALE_FACTOR = 12;
+Ball.BIRTH_SPEED = 500;
