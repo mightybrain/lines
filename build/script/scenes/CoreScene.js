@@ -16,6 +16,8 @@ class CoreScene {
       stepSize: this._stepSize,
     })
 
+    this._queue.prepareBalls();
+
 		this._field = new Field({
       canvasSize: this._canvasSize,
       stepSize: this._stepSize,
@@ -24,7 +26,6 @@ class CoreScene {
       state: this._state,
     });
 
-    this._queue.prepareBalls();
     this._field.spawnBalls();
   }
 

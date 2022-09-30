@@ -6,9 +6,12 @@ class Field {
 		this._queue = queue;
 		this._state = state;
 
+		this._lockInput = false;
+
     this._map = [];
     this._setMap();
 
+		this._overlay = [];
 		this._selectedCell = null;
 
     this._size = 0;
@@ -25,7 +28,19 @@ class Field {
   }
 
 	update(time) {
+		this._map.forEach(row => {
+			row.forEach(cell => {
+				if (cell.ball) cell.ball.update(time);
+			})
+		})
 
+		this._overlay = this._overlay.filter(ball => {
+			const { stage } = ball.getProps();
+			return stage !== Ball.STAGES[4];
+		})
+		this._overlay.forEach(ball => {
+			ball.update(time);
+		})
 	}
 
 	_setMap() {
@@ -82,6 +97,10 @@ class Field {
 				if (cell.ball) cell.ball.render(ctx);
 			})
 		})
+
+		this._overlay.forEach(ball => {
+			ball.render(ctx);
+		})
 	}
 
 	_getFreeCells() {
@@ -103,6 +122,7 @@ class Field {
 				key,
 				color,
 				size,
+				birthDelay: i * 50,
 				position: {
 					x: cell.position.x + (this._cellSize - size) / 2,
 					y: cell.position.y + (this._cellSize - size) / 2,
@@ -132,10 +152,13 @@ class Field {
 	}
 
   handleClick(event) {
+		if (this._lockInput) return;
+
  		const borderTop = this._position.y + this._innerOffset;
 		const borderRight = this._position.x + this._size - this._innerOffset;
 		const borderBottom = this._position.y + this._size - this._innerOffset;
 		const borderLeft = this._position.x + this._innerOffset;
+
 		if (event.offsetX < borderLeft || event.offsetX > borderRight || event.offsetY < borderTop || event.offsetY > borderBottom) return;
 
 		const x = Math.floor((event.offsetX - this._position.x - this._innerOffset) / (this._cellSize + this._cellsBetweenSize));
@@ -176,6 +199,14 @@ class Field {
 		this.spawnBalls();
 	}
 
+	/*
+	_moveBall(path) {
+		const ball = path[0].ball;
+		this._overlay.push(ball);
+		path[0].ball = null;
+	}
+	*/
+
 	_findPath(from, to) {
 		const directions = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x:-1, y: 0 }];
 		
@@ -215,6 +246,8 @@ class Field {
 
 	_clearSequences(cells) {
 		cells.forEach(cell => {
+			cell.ball.destroy();
+			this._overlay.push(cell.ball);
 			cell.ball = null;
 		})
 	}
@@ -301,3 +334,4 @@ Field.CELL_CORNER_SCALE_FACTOR = 6;
 Field.CELLS_BY_SIDE_COUNTER = 9;
 Field.SCORE_PER_BALL = 1;
 Field.MIN_SEQUENCE_LENGTH = 5;
+

@@ -21,3 +21,10 @@ function getRandomFromRange(from, to) {
 function coordsAreEqual(a, b) {
   return a.x === b.x && a.y === b.y;
 }
+
+function calcFourPointsBezier(x, y, time) {
+  return {
+    x: Math.pow(1 - time, 3) * x[0] + 3 * Math.pow(1 - time, 2) * time * x[1] + 3 * (1 - time) * Math.pow(time, 2) * x[2] + Math.pow(time, 3) * x[3],
+    y: Math.pow(1 - time, 3) * y[0] + 3 * Math.pow(1 - time, 2) * time * y[1] + 3 * (1 - time) * Math.pow(time, 2) * y[2] + Math.pow(time, 3) * y[3],
+  }
+}

@@ -1,10 +1,53 @@
 class Ball {
-  constructor({ key, color, size, position }) {
+  constructor({ key, color, size, position, birthDelay }) {
 		this._key = key;
 		this._color = color;
 		this._position = position;
 		this._size = size;
+		this._birthDelay = birthDelay;
+
+		this._scale = 0;
+
+		this._stage = Ball.STAGES[1];
+
+		this._startBirthTimestamp = 0;
+		this._startDestroyingTimestamp = 0;
   }
+
+	update(time) {
+		const { timestamp } = time;
+
+		if (this._stage === Ball.STAGES[1]) this._updateBirth(timestamp);
+		if (this._stage === Ball.STAGES[3]) this._updateDestroing(timestamp);
+	}
+
+	_updateBirth(timestamp) {
+		if (!this._startBirthTimestamp) this._startBirthTimestamp = timestamp + this._birthDelay;
+
+		const birthTime = timestamp - this._startBirthTimestamp;
+
+		if (birthTime > 0 && birthTime < Ball.BIRTH_SPEED) {
+			const { x, y } = calcFourPointsBezier(Ball.BIRTH_X, Ball.BIRTH_Y, birthTime / Ball.BIRTH_SPEED);
+			this._scale = (x + y) / 2;
+		} else if (birthTime >= Ball.BIRTH_SPEED) {
+			this._scale = 1;
+			this._stage = Ball.STAGES[2];
+		}
+	}
+
+	_updateDestroing(timestamp) {
+		if (!this._startDestroyingTimestamp) this._startDestroyingTimestamp = timestamp;
+
+		const destroyingTime = timestamp - this._startDestroyingTimestamp;
+
+		if (destroyingTime > 0 && destroyingTime < Ball.DESTROYING_SPEED) {
+			const { x, y } = calcFourPointsBezier(Ball.DESTROY_X, Ball.DESTROY_Y, destroyingTime / Ball.DESTROYING_SPEED);
+			this._scale = (x + y) / 2;
+		} else if (destroyingTime > Ball.DESTROYING_SPEED) {
+			this._scale = 0;
+			this._stage = Ball.STAGES[4];
+		}
+	}
 
 	setSize(size) {
 		this._size = size;
@@ -15,14 +58,24 @@ class Ball {
 		this._position.y = position.y;
 	}
 
+	destroy() {
+		this._stage = Ball.STAGES[3];
+	}
+
 	render(ctx) {
-		const ballGradientOffset = this._size * 0.33;
-		const gradient = ctx.createRadialGradient(this._position.x + ballGradientOffset, this._position.y + ballGradientOffset, 0, this._position.x + ballGradientOffset, this._position.y + ballGradientOffset, this._size * 0.72);
+		const renderSize = this._size * this._scale;
+		const renderPosition = {
+			x: this._position.x + (this._size - renderSize) / 2,
+			y: this._position.y + (this._size - renderSize) / 2,
+		}
+
+		const ballGradientOffset = renderSize * 0.33;
+		const gradient = ctx.createRadialGradient(renderPosition.x + ballGradientOffset, renderPosition.y + ballGradientOffset, 0, renderPosition.x + ballGradientOffset, renderPosition.y + ballGradientOffset, renderSize * 0.72);
 		gradient.addColorStop(0, this._color[0]);
 		gradient.addColorStop(.5, this._color[1]);
 		gradient.addColorStop(1, this._color[2]);
 		ctx.fillStyle = gradient;
-		renderRoundedRect(ctx, this._position.x, this._position.y, this._size, this._size, this._size / 2);
+		renderRoundedRect(ctx, renderPosition.x, renderPosition.y, renderSize, renderSize, renderSize / 2);
 	}
 
 	getProps() {
@@ -30,7 +83,7 @@ class Ball {
 			key: this._key,
 			color: this._color,
 			size: this._size,
-			position: this._position,
+			stage: this._stage,
 		}
 	}
 }
@@ -45,5 +98,17 @@ Ball.COLORS = {
 	yel: ['#FFF9E5', '#FCDD39', '#B1881E'],
 }
 
+Ball.STAGES = {
+	1: 'birth',
+	2: 'static',
+	3: 'destroying',
+	4: 'destroyed',
+}
+
 Ball.SIZE_SCALE_FACTOR = 12;
 Ball.BIRTH_SPEED = 500;
+Ball.DESTROYING_SPEED = 500;
+Ball.BIRTH_X = [0, 0.75, 0.5, 1];
+Ball.BIRTH_Y = [0, 0, 2.5, 1];
+Ball.DESTROY_X = [1, 0.5, 0.75, 0];
+Ball.DESTROY_Y = [1, 2.5, 0, 0];
