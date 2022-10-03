@@ -11,7 +11,7 @@ class Field {
     this._map = [];
     this._setMap();
 
-		this._overlay = [];
+		this._balls = [];
 		this._selectedCell = null;
 
     this._size = 0;
@@ -28,17 +28,8 @@ class Field {
   }
 
 	update(time) {
-		this._map.forEach(row => {
-			row.forEach(cell => {
-				if (cell.ball) cell.ball.update(time);
-			})
-		})
-
-		this._overlay = this._overlay.filter(ball => {
-			const { stage } = ball.getProps();
-			return stage !== Ball.STAGES[4];
-		})
-		this._overlay.forEach(ball => {
+		this._balls = this._balls.filter(ball => ball.getStage() !== ActiveBall.STAGES[5])
+		this._balls.forEach(ball => {
 			ball.update(time);
 		})
 	}
@@ -93,12 +84,10 @@ class Field {
 			row.forEach(cell => {
 				ctx.fillStyle = this._selectedCell && this._selectedCell === cell ? '#335070' : '#203E60';
 				renderRoundedRect(ctx, cell.position.x, cell.position.y, this._cellSize, this._cellSize, this._cellCornerRadius);
-
-				if (cell.ball) cell.ball.render(ctx);
 			})
 		})
 
-		this._overlay.forEach(ball => {
+		this._balls.forEach(ball => {
 			ball.render(ctx);
 		})
 	}
@@ -108,7 +97,7 @@ class Field {
 	}
 
 	spawnBalls() {
-		const ballsInQueue = this._queue.getQueue();
+		const ballsInQueue = this._queue.getBallsInQueue();
 		let freeCells = this._getFreeCells();
 		const ballsToSpawnCounter = Math.min(freeCells.length, ballsInQueue.length);
 		const cells = [];
@@ -116,12 +105,16 @@ class Field {
 		for (let i = 0; i < ballsToSpawnCounter; i++) {
 			const cell = freeCells[getRandomFromRange(0, freeCells.length)];
 			cells.push(cell);
-			const { key, color, size } = ballsInQueue.shift().getProps();
+			const { key, color } = ballsInQueue.shift().getColorAndKey();
+			const size = this._stepSize.common * ActiveBall.SIZE_SCALE_FACTOR;
 
-			const ball = new Ball({
+			const ball = new ActiveBall({
 				key,
 				color,
 				size,
+				cellSize: this._cellSize,
+				stepSize: this._stepSize,
+				field: this,
 				birthDelay: i * 50,
 				position: {
 					x: cell.position.x + (this._cellSize - size) / 2,
@@ -130,12 +123,13 @@ class Field {
 			})
 
 			this._map[cell.coords.y][cell.coords.x].ball = ball;
+			this._balls.push(ball);
 			freeCells = this._getFreeCells();
 		}
 
-		const sequences = this._findSequences(cells);
+		const sequences = this.findSequences(cells);
 		if (sequences.length) {
-			this._clearSequences(sequences.flat());
+			this.clearSequences(sequences.flat());
 			const points = sequences.flat().length * Field.SCORE_PER_BALL;
 			this._score.addNewPoints(points);
 			freeCells = this._getFreeCells();
@@ -173,39 +167,11 @@ class Field {
   }
 
 	_moveBall(path) {
-		const from = path[0];
-		const to = path[path.length - 1];
-
-		const { size } = from.ball.getProps();
-
-		const position = {
-			x: to.position.x + (this._cellSize - size) / 2,
-			y: to.position.y + (this._cellSize - size) / 2,
-		}
-
-		to.ball = from.ball;
-		to.ball.setPosition(position);
-		from.ball = null;
-
+		const ball = this._selectedCell.ball;
+		this._selectedCell.ball = null;
 		this._selectedCell = null;
-
-		const sequences = this._findSequences([to]);
-		if (sequences.length) {
-			this._clearSequences(sequences.flat());
-			const points = sequences.flat().length * Field.SCORE_PER_BALL;
-			this._score.addNewPoints(points);
-		}
-
-		this.spawnBalls();
+		ball.move(path);
 	}
-
-	/*
-	_moveBall(path) {
-		const ball = path[0].ball;
-		this._overlay.push(ball);
-		path[0].ball = null;
-	}
-	*/
 
 	_findPath(from, to) {
 		const directions = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x:-1, y: 0 }];
@@ -244,15 +210,14 @@ class Field {
 		return path;
 	}
 
-	_clearSequences(cells) {
+	clearSequences(cells) {
 		cells.forEach(cell => {
 			cell.ball.destroy();
-			this._overlay.push(cell.ball);
 			cell.ball = null;
 		})
 	}
 
-	_findSequences(cells) {
+	findSequences(cells) {
 		const directions = [
 			{
 				axis: 'y',
@@ -291,7 +256,7 @@ class Field {
 		const sequences = [];
 
 		cells.forEach(cell => {
-			const { key } = cell.ball.getProps();
+			const { key } = cell.ball.getColorAndKey();
 
 			axes.forEach(axis => {
 				const queue = [cell];
@@ -310,7 +275,7 @@ class Field {
 							Field.CELLS_BY_SIDE_COUNTER - 1
 						); 
 						const nextCell = this._map[y][x];
-						if (nextCell.ball && nextCell.ball.getProps().key === key && !sequence.includes(nextCell)) {
+						if (nextCell.ball && nextCell.ball.getColorAndKey().key === key && !sequence.includes(nextCell)) {
 							sequence.push(nextCell);
 							queue.push(nextCell);
 						}
@@ -321,6 +286,7 @@ class Field {
 			})
 		})
 
+		//console.log(sequences)
 		return sequences;
 	}
 }

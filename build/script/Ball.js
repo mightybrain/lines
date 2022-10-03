@@ -1,66 +1,12 @@
 class Ball {
-  constructor({ key, color, size, position, birthDelay }) {
+  constructor({ key, color, size, position, scale }) {
 		this._key = key;
 		this._color = color;
 		this._position = position;
 		this._size = size;
-		this._birthDelay = birthDelay;
 
-		this._scale = 0;
-
-		this._stage = Ball.STAGES[1];
-
-		this._startBirthTimestamp = 0;
-		this._startDestroyingTimestamp = 0;
+		this._scale = scale || 0;
   }
-
-	update(time) {
-		const { timestamp } = time;
-
-		if (this._stage === Ball.STAGES[1]) this._updateBirth(timestamp);
-		if (this._stage === Ball.STAGES[3]) this._updateDestroing(timestamp);
-	}
-
-	_updateBirth(timestamp) {
-		if (!this._startBirthTimestamp) this._startBirthTimestamp = timestamp + this._birthDelay;
-
-		const birthTime = timestamp - this._startBirthTimestamp;
-
-		if (birthTime > 0 && birthTime < Ball.BIRTH_SPEED) {
-			const { x, y } = calcFourPointsBezier(Ball.BIRTH_X, Ball.BIRTH_Y, birthTime / Ball.BIRTH_SPEED);
-			this._scale = (x + y) / 2;
-		} else if (birthTime >= Ball.BIRTH_SPEED) {
-			this._scale = 1;
-			this._stage = Ball.STAGES[2];
-		}
-	}
-
-	_updateDestroing(timestamp) {
-		if (!this._startDestroyingTimestamp) this._startDestroyingTimestamp = timestamp;
-
-		const destroyingTime = timestamp - this._startDestroyingTimestamp;
-
-		if (destroyingTime > 0 && destroyingTime < Ball.DESTROYING_SPEED) {
-			const { x, y } = calcFourPointsBezier(Ball.DESTROY_X, Ball.DESTROY_Y, destroyingTime / Ball.DESTROYING_SPEED);
-			this._scale = (x + y) / 2;
-		} else if (destroyingTime > Ball.DESTROYING_SPEED) {
-			this._scale = 0;
-			this._stage = Ball.STAGES[4];
-		}
-	}
-
-	setSize(size) {
-		this._size = size;
-	}
-
-	setPosition(position) {
-		this._position.x = position.x;
-		this._position.y = position.y;
-	}
-
-	destroy() {
-		this._stage = Ball.STAGES[3];
-	}
 
 	render(ctx) {
 		const renderSize = this._size * this._scale;
@@ -77,15 +23,6 @@ class Ball {
 		ctx.fillStyle = gradient;
 		renderRoundedRect(ctx, renderPosition.x, renderPosition.y, renderSize, renderSize, renderSize / 2);
 	}
-
-	getProps() {
-		return {
-			key: this._key,
-			color: this._color,
-			size: this._size,
-			stage: this._stage,
-		}
-	}
 }
 
 Ball.COLORS = {
@@ -97,18 +34,3 @@ Ball.COLORS = {
 	sea: ['#E5FFF9', '#51E0FF', '#2391B4'],
 	yel: ['#FFF9E5', '#FCDD39', '#B1881E'],
 }
-
-Ball.STAGES = {
-	1: 'birth',
-	2: 'static',
-	3: 'destroying',
-	4: 'destroyed',
-}
-
-Ball.SIZE_SCALE_FACTOR = 12;
-Ball.BIRTH_SPEED = 500;
-Ball.DESTROYING_SPEED = 500;
-Ball.BIRTH_X = [0, 0.75, 0.5, 1];
-Ball.BIRTH_Y = [0, 0, 2.5, 1];
-Ball.DESTROY_X = [1, 0.5, 0.75, 0];
-Ball.DESTROY_Y = [1, 2.5, 0, 0];
