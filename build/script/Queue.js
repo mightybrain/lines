@@ -18,9 +18,7 @@ class Queue {
   }
 
 	update(time) {
-		this._balls.forEach(ball => {
-			ball.update(time);
-		})
+		this._balls.forEach(ball => ball.update(time));
 	}
 
 	setSize() {
@@ -33,7 +31,7 @@ class Queue {
 			const ballSize = this._stepSize.common * PreparedBall.SIZE_SCALE_FACTOR;
 			const ballPosition = {
 				x: this._areaPosition.x + this._stepSize.common * 2 * (index + 1) + index * ballSize,
-				y: this._areaPosition.y + this._areaSize.height / 2 - ballSize / 2,
+				y: this._areaPosition.y + (this._areaSize.height - ballSize) / 2,
 			};
 			ball.setSize(ballSize);
 			ball.setPosition(ballPosition);
@@ -59,7 +57,7 @@ class Queue {
 		for(let i = 0; i < Queue.SPAWN_BALLS_AT_TIME; i++) {
 			const key = this._getRandomBallKey();
 			const color = Ball.COLORS[key];
-			const size = this._stepSize.common * PreparedBall.SIZE_SCALE_FACTOR;
+			const size = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
 			const birthDelay = i * 50;
 			const position = {
 				x: this._areaPosition.x + this._stepSize.common * 2 * (this._balls.length + 1) + this._balls.length * size,

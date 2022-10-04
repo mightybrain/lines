@@ -9,7 +9,7 @@ class SceneManager {
   }
 
   update(time) {
-    const { delta } = time;
+    const { timeBetweenFrames } = time;
 
     if (this._currentScene) this._currentScene.update(time);
 
@@ -17,9 +17,9 @@ class SceneManager {
       this._currentScene = this._futureScene;
       this._futureScene = null;
     } else if (this._futureScene && this._opacity < 1) {
-      this._opacity = Math.min(this._opacity + delta / SceneManager.DURATION, 1);
+      this._opacity = Math.min(this._opacity + timeBetweenFrames / SceneManager.FADE_DURATION, 1);
     } else if (!this._futureScene && this._opacity > 0) {
-      this._opacity = Math.max(this._opacity - delta / SceneManager.DURATION, 0);
+      this._opacity = Math.max(this._opacity - timeBetweenFrames / SceneManager.FADE_DURATION, 0);
     }
   }
 
@@ -62,4 +62,4 @@ class SceneManager {
   }
 }
 
-SceneManager.DURATION = 0.5;
+SceneManager.FADE_DURATION = 500;
