@@ -1,11 +1,53 @@
 class Ball {
-  constructor({ key, color, size, position, scale = 0 }) {
+  constructor({ key, color, size, position, scale = 0, birthDelay = 0 }) {
 		this._key = key;
 		this._color = color;
 		this._position = position;
 		this._size = size;
 		this._scale = scale;
+		this._birthDelay = birthDelay;
+		this._destroyDelay = 0;
+
+		this._startBirthTimestamp = 0;
+		this._startDestroyingTimestamp = 0;
+
+		this._stage = Ball.STAGES[1];
   }
+
+	update(time) {
+		const { timestamp } = time;
+
+		if (this._stage === Ball.STAGES[1]) this._updateBirth(timestamp);
+		if (this._stage === Ball.STAGES[3]) this._updateDestroing(timestamp);
+	}
+
+	_updateBirth(timestamp) {
+    if (!this._startBirthTimestamp) this._startBirthTimestamp = timestamp + this._birthDelay;
+
+		const birthTime = timestamp - this._startBirthTimestamp;
+
+		if (birthTime >= Ball.BIRTH_SPEED) {
+			this._stage = Ball.STAGES[2];
+			this._scale = 1;
+		} else if (birthTime > 0) {
+			const { x, y } = calcFourPointsBezier(Ball.BIRTH_X, Ball.BIRTH_Y, birthTime / Ball.BIRTH_SPEED);
+			this._scale = (x + y) / 2;
+		}
+	}
+
+	_updateDestroing(timestamp) {
+		if (!this._startDestroyingTimestamp) this._startDestroyingTimestamp = timestamp + this._destroyDelay;
+
+		const destroyingTime = timestamp - this._startDestroyingTimestamp;
+
+		if (destroyingTime >= Ball.DESTROYING_SPEED) {
+			this._scale = 0;
+			this._stage = Ball.STAGES[4];
+		} else if (destroyingTime > 0) {
+			const { x, y } = calcFourPointsBezier(Ball.DESTROY_X, Ball.DESTROY_Y, destroyingTime / Ball.DESTROYING_SPEED);
+			this._scale = (x + y) / 2;
+		}
+	}
 
 	render(ctx) {
 		const renderSize = this._size * this._scale;
@@ -23,6 +65,20 @@ class Ball {
 		renderRoundedRect(ctx, renderPosition.x, renderPosition.y, renderSize, renderSize, renderSize / 2);
 	}
 
+	setSize(size) {
+		this._size = size;
+	}
+
+	setPosition(position) {
+		this._position.x = position.x;
+		this._position.y = position.y;
+	}
+
+	destroy(delay) {
+		this._destroyDelay = delay;
+		this._stage = Ball.STAGES[3];
+	}
+
 	getColorAndKey() {
 		return {
 			key: this._key,
@@ -33,6 +89,10 @@ class Ball {
   getStage() {
     return this._stage;
   }
+
+	getSize() {
+		return this._size;
+	}
 }
 
 Ball.COLORS = {
@@ -48,15 +108,13 @@ Ball.COLORS = {
 Ball.STAGES = {
 	1: 'birth',
 	2: 'static',
-	3: 'moving',
-	4: 'destroying',
-	5: 'destroyed',
+	3: 'destroying',
+	4: 'destroyed',
 }
 
 Ball.SIZE_SCALE_FACTOR = 12;
 Ball.BIRTH_SPEED = 500;
 Ball.DESTROYING_SPEED = 500;
-Ball.MOVE_SPEED_PER_CELL = 100;
 Ball.BIRTH_X = [0, 0.75, 0.5, 1];
 Ball.BIRTH_Y = [0, 0, 2.5, 1];
 Ball.DESTROY_X = [1, 0.5, 0.75, 0];

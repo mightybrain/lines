@@ -12,6 +12,7 @@ class Field {
 		this._lockInput = false;
 
 		this._balls = [];
+		this._ballsTransports = [];
 		this._selectedCell = null;
 
     this._size = 0;
@@ -31,8 +32,13 @@ class Field {
     this.setSize();
   }
 
+
 	update(time) {
-		this._balls = this._balls.filter(ball => ball.getStage() !== Ball.STAGES[5]);
+		this._ballsTransports = this._ballsTransports.filter(transport => !transport.getDone());
+		if (this._ballsTransports.length) this._ballsTransports.forEach(transport => transport.update(time));
+		else this._lockInput = false;
+		
+		this._balls = this._balls.filter(ball => ball.getStage() !== Ball.STAGES[4]);
 		this._balls.forEach(ball => ball.update(time));
 	}
 
@@ -65,8 +71,7 @@ class Field {
 				cell.position.x = this._position.x + this._innerOffset + (this._cellSize.common + this._cellsBetweenSize.common) * x;
 				cell.position.y = this._position.y + this._innerOffset + (this._cellSize.common + this._cellsBetweenSize.common) * y;
 
-				if (cell.ball) cell.ball.setSize();
-				/*if (cell.ball) {
+				if (cell.ball) {
 					const ballSize = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
 					const ballPosition = {
 						x: cell.position.x + (this._cellSize.common - ballSize) / 2,
@@ -74,9 +79,11 @@ class Field {
 					}
 					cell.ball.setSize(ballSize);
 					cell.ball.setPosition(ballPosition);
-				}*/
+				}
 			})
 		})
+
+		this._ballsTransports.forEach(transport => transport.setSize());
 	}
 
 	render(ctx) {
@@ -174,10 +181,19 @@ class Field {
 	}
 
 	_moveBall(path) {
+		this._lockInput = true;
 		const ball = this._selectedCell.ball;
 		this._selectedCell.ball = null;
 		this._selectedCell = null;
-		ball.move(path);
+		this._ballsTransports.push(new BallTransport({
+			stepSize: this._stepSize,
+			cellSize: this._cellSize,
+			cellsBetweenSize: this._cellsBetweenSize,
+			field: this,
+			score: this._score,
+			ball,
+			path,
+		}))
 	}
 
 	_findPath(from, to) {
@@ -247,16 +263,10 @@ class Field {
 			const { key, color } = ballsInQueue.shift().getColorAndKey();
 			const size = this._stepSize.common * Ball.SIZE_SCALE_FACTOR;
 
-			const ball = new ActiveBall({
+			const ball = new Ball({
 				key,
 				color,
 				size,
-				cellSize: this._cellSize,
-				cellsBetweenSize: this._cellsBetweenSize,
-				stepSize: this._stepSize,
-				score: this._score,
-				cell,
-				field: this,
 				birthDelay: i * 50,
 				position: {
 					x: cell.position.x + (this._cellSize.common - size) / 2,
