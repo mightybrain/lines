@@ -49,8 +49,7 @@ class Game {
 
 		if (this._prevTimestamp) {
 			const delta = (timestamp - this._prevTimestamp) / 1000;
-			const timeBetweenFrames = timestamp - this._prevTimestamp;
-			this._sceneManager.update({ delta, timestamp, timeBetweenFrames });
+			this._sceneManager.update({ delta, timestamp });
 			this._renderer.render();
 		}
 		
@@ -61,9 +60,6 @@ class Game {
 		window.addEventListener('resize', () => {
 			this._setSize();
 			this._sceneManager.setSize();
-		})
- 		window.addEventListener('keyup', event => {
-			this._sceneManager.handleKeyUp(event);
 		})
 		window.addEventListener('click', event => {
 			this._sceneManager.handleClick(event);
@@ -76,8 +72,8 @@ class Game {
 		this._canvas.width = this._canvasSize.width;
 		this._canvas.height = this._canvasSize.height;
 
-		this._stepSize.common = (this._canvasSize.height - 100) / Game.MAX_STEPS.y;
-		if (this._canvasSize.height > this._canvasSize.width) this._stepSize.common = (this._canvasSize.width - 40) / Game.MAX_STEPS.x;
+		if (this._canvasSize.width >= this._canvasSize.height) this._stepSize.common = (this._canvasSize.height - 100) / Game.MAX_STEPS.y;
+		else this._stepSize.common = (this._canvasSize.width - 40) / Game.MAX_STEPS.x;
 	}
 }
 

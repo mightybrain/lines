@@ -48,10 +48,6 @@ class CoreScene {
     this._score.render(ctx);
   }
 
-  handleKeyUp(code) {
-
-  }
-
   handleClick(event) {
     this._field.handleClick(event);
   }

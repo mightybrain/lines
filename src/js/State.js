@@ -12,7 +12,7 @@ class State {
   }
 
   getTotalScore() {
-    
+    return this._totalScore;
   }
 
   setMainScene() {
@@ -38,5 +38,4 @@ class State {
       stepSize: this._stepSize,
     }))
   }
-
 }

@@ -8,8 +8,7 @@ function renderRoundedRect(ctx, x, y, width, height, radius) {
   ctx.fill();
 }
 
-function calcTextMetrics(ctx, fontSize, text) {
-  ctx.font = `${fontSize}px LuckiestGuy`;
+function calcTextMetrics(ctx, text) {
   const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = ctx.measureText(text);
   return { textWidth: width, textHeight: actualBoundingBoxAscent + actualBoundingBoxDescent }
 }

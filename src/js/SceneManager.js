@@ -4,12 +4,12 @@ class SceneManager {
 
     this._currentScene = null;
     this._futureScene = null;
-    
     this._opacity = 0;
   }
 
   update(time) {
-    const { timeBetweenFrames } = time;
+    const { delta } = time;
+    const prevFrameDuration = delta * 1000;
 
     if (this._currentScene) this._currentScene.update(time);
 
@@ -17,9 +17,9 @@ class SceneManager {
       this._currentScene = this._futureScene;
       this._futureScene = null;
     } else if (this._futureScene && this._opacity < 1) {
-      this._opacity = Math.min(this._opacity + timeBetweenFrames / SceneManager.FADE_DURATION, 1);
+      this._opacity = Math.min(this._opacity + prevFrameDuration / SceneManager.FADE_DURATION, 1);
     } else if (!this._futureScene && this._opacity > 0) {
-      this._opacity = Math.max(this._opacity - timeBetweenFrames / SceneManager.FADE_DURATION, 0);
+      this._opacity = Math.max(this._opacity - prevFrameDuration / SceneManager.FADE_DURATION, 0);
     }
   }
 
@@ -42,12 +42,6 @@ class SceneManager {
   setFutureScene(scene) {
     this._futureScene = scene;
   }
-
-	handleKeyUp(event) {
-    if (this._futureScene || this._opacity) return;
-
-    if (this._currentScene) this._currentScene.handleKeyUp(event.code);
-	}
 
   handleClick(event) {
     if (this._futureScene || this._opacity) return;

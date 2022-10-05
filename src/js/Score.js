@@ -7,12 +7,8 @@ class Score {
 			width: 0,
 			heigh: 0,
 		};
-		this._fontSize = {
-			common: 0,
-		};
-		this._spriteSize = {
-			common: 0,
-		}
+		this._fontSize = 0;
+		this._spriteSize = 0;
 		this._areaCornerRadius = 0;
 		this.setSize();
 
@@ -49,16 +45,18 @@ class Score {
 
 	setSize() {
 		this._areaSize.height = this._stepSize.common * Score.AREA_HEIGHT_SCALE_FACTOR;
-		this._fontSize.common = this._stepSize.common * Score.FONT_SIZE_SCALE_FACTOR;
-		this._spriteSize.common = this._stepSize.common * Score.SPRITE_SIZE_SCALE_FACTOR;
+		this._fontSize = this._stepSize.common * Score.FONT_SIZE_SCALE_FACTOR;
+		this._spriteSize = this._stepSize.common * Score.SPRITE_SIZE_SCALE_FACTOR;
 		this._areaCornerRadius = this._stepSize.common * Score.AREA_CORNER_SCALE_FACTOR;
 	}
 
   render(ctx) {
     if (!this._loaded) return;
 
-		const { textWidth, textHeight } = calcTextMetrics(ctx, this._fontSize.common, this._currentScore);
-		const areaWidth = textWidth + this._spriteSize.common + this._stepSize.common * 9;
+    ctx.font = `${this._fontSize}px LuckiestGuy`;
+
+		const { textWidth, textHeight } = calcTextMetrics(ctx, this._currentScore);
+		const areaWidth = textWidth + this._spriteSize + this._stepSize.common * 9;
 
 		const areaPosition = {
 			x: this._canvasSize.width - areaWidth - 20,
@@ -71,18 +69,17 @@ class Score {
 		}
 
 		const spritePosition = {
-			x: areaPosition.x + areaWidth - this._spriteSize.common - this._stepSize.common * 3,
-			y: areaPosition.y + this._areaSize.height / 2 - this._spriteSize.common / 2,
+			x: areaPosition.x + areaWidth - this._spriteSize - this._stepSize.common * 3,
+			y: areaPosition.y + this._areaSize.height / 2 - this._spriteSize / 2,
 		}
 
     ctx.fillStyle = '#5DBB46';
     renderRoundedRect(ctx, areaPosition.x, areaPosition.y, areaWidth, this._areaSize.height, this._areaCornerRadius);
 
-    ctx.font = `${this._fontSize.common}px LuckiestGuy`;
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText(this._currentScore, textPosition.x, textPosition.y);
 
-    ctx.drawImage(this._sprite, spritePosition.x, spritePosition.y, this._spriteSize.common, this._spriteSize.common);
+    ctx.drawImage(this._sprite, spritePosition.x, spritePosition.y, this._spriteSize, this._spriteSize);
   }
 }
 
