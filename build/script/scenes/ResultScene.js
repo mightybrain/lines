@@ -57,6 +57,7 @@ class ResultScene {
         x: 20,
         y: pointsPosition.y + this._spaceBetweenParagraphs + (index + 1) * textHeight + index * this._spaceBetweenLines,
       }
+      
       ctx.fillStyle = '#EFCA30';
       ctx.fillText(line, linePosition.x, linePosition.y);
     })

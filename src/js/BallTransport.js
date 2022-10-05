@@ -16,13 +16,9 @@ class BallTransport {
     this.setSize();
 
     this._duration = (this._path.length - 1) * BallTransport.MOVE_SPEED_PER_CELL;
-
     this._startMovingTimestamp = 0;
-    this._done = false;
-  }
 
-  getDone() {
-    return this._done;
+    this._done = false;
   }
 
   setSize() {
@@ -31,9 +27,9 @@ class BallTransport {
     this._ball.setSize(this._stepSize.common * Ball.SIZE_SCALE_FACTOR);
   }
 
-	update(time) {
-		const { timestamp } = time;
+	update({ timestamp }) {
     if (!this._startMovingTimestamp) this._startMovingTimestamp = timestamp;
+
     const movingTime = timestamp - this._startMovingTimestamp;
 
 		if (movingTime >= this._duration) this._setFinishPosition();
@@ -46,18 +42,20 @@ class BallTransport {
     const addition = (progress % this._stepLength) / this._stepLength;
     const cell = this._path[index];
     const nextCell = this._path[index + 1];
-    
+
+    const ballSize = this._ball.getSize();
     const ballPosition = {
-      x: cell.position.x + (nextCell.position.x - cell.position.x) * addition + (this._cellSize.common - this._ball.getSize()) / 2,
-      y: cell.position.y + (nextCell.position.y - cell.position.y) * addition + (this._cellSize.common - this._ball.getSize()) / 2,
+      x: cell.position.x + (nextCell.position.x - cell.position.x) * addition + (this._cellSize.common - ballSize) / 2,
+      y: cell.position.y + (nextCell.position.y - cell.position.y) * addition + (this._cellSize.common - ballSize) / 2,
     }
     this._ball.setPosition(ballPosition);
   }
 
   _setFinishPosition() {
+    const ballSize = this._ball.getSize();
     const ballPosition = {
-      x: this._to.position.x + (this._cellSize.common - this._ball.getSize()) / 2,
-      y: this._to.position.y + (this._cellSize.common - this._ball.getSize()) / 2,
+      x: this._to.position.x + (this._cellSize.common - ballSize) / 2,
+      y: this._to.position.y + (this._cellSize.common - ballSize) / 2,
     }
     this._ball.setPosition(ballPosition);
     this._to.ball = this._ball;
@@ -69,6 +67,10 @@ class BallTransport {
     } else this._field.spawnBalls();
 
     this._done = true;
+  }
+
+  getDone() {
+    return this._done;
   }
 }
 

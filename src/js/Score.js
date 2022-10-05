@@ -33,9 +33,7 @@ class Score {
 		return this._currentScore;
 	}
 
-  update(time) {
-		const { timestamp } = time;
-
+  update({ timestamp }) {
 		if (this._newScore && timestamp - this._lastUpdateTimestamp >= Score.UPDATE_SPEED) {
 			this._currentScore++;
 			this._newScore--;

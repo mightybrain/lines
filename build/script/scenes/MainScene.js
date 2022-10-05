@@ -13,6 +13,7 @@ class MainScene {
 
     this._fontSize = 0;
     this._spaceBetweenLines = 0;
+    this._spaceBetweenParagraphs = 0;
     this.setSize();
   }
 
@@ -23,6 +24,7 @@ class MainScene {
   setSize() {
     this._fontSize = this._stepSize.common * MainScene.FONT_SIZE_SCALE_FACTOR;
     this._spaceBetweenLines = this._stepSize.common * MainScene.SPACE_BETWEEN_LINES_SCALE_FACTOR;
+    this._spaceBetweenParagraphs = this._stepSize.common * MainScene.SPACE_BETWEEN_PARAGRAPHS_SCALE_FACTOR;
   }
 
   render(ctx) {
@@ -44,8 +46,9 @@ class MainScene {
     this._hint.forEach((line, index) => {
       const linePosition = {
         x: 20,
-        y: titlePosition.y + 40 + (index + 1) * textHeight + index * this._spaceBetweenLines,
+        y: titlePosition.y + this._spaceBetweenParagraphs + (index + 1) * textHeight + index * this._spaceBetweenLines,
       }
+      
       ctx.fillStyle = '#EFCA30';
       ctx.fillText(line, linePosition.x, linePosition.y);
     })
@@ -59,3 +62,4 @@ class MainScene {
 
 MainScene.FONT_SIZE_SCALE_FACTOR = 30;
 MainScene.SPACE_BETWEEN_LINES_SCALE_FACTOR = 6;
+MainScene.SPACE_BETWEEN_PARAGRAPHS_SCALE_FACTOR = 8;

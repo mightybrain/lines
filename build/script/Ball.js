@@ -15,13 +15,11 @@ class Ball {
   }
 
 	update(time) {
-		const { timestamp } = time;
-
-		if (this._stage === Ball.STAGES[1]) this._updateBirth(timestamp);
-		if (this._stage === Ball.STAGES[3]) this._updateDestroing(timestamp);
+		if (this._stage === Ball.STAGES[1]) this._updateBirth(time);
+		if (this._stage === Ball.STAGES[3]) this._updateDestroing(time);
 	}
 
-	_updateBirth(timestamp) {
+	_updateBirth({ timestamp }) {
     if (!this._startBirthTimestamp) this._startBirthTimestamp = timestamp + this._birthDelay;
 
 		const birthTime = timestamp - this._startBirthTimestamp;
@@ -35,14 +33,14 @@ class Ball {
 		}
 	}
 
-	_updateDestroing(timestamp) {
+	_updateDestroing({ timestamp }) {
 		if (!this._startDestroyingTimestamp) this._startDestroyingTimestamp = timestamp + this._destroyDelay;
 
 		const destroyingTime = timestamp - this._startDestroyingTimestamp;
 
 		if (destroyingTime >= Ball.DESTROYING_SPEED) {
-			this._scale = 0;
 			this._stage = Ball.STAGES[4];
+			this._scale = 0;
 		} else if (destroyingTime > 0) {
 			const { x, y } = calcFourPointsBezier(Ball.DESTROY_X, Ball.DESTROY_Y, destroyingTime / Ball.DESTROYING_SPEED);
 			this._scale = (x + y) / 2;
