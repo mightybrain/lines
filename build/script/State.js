@@ -1,9 +1,7 @@
 class State {
-  constructor({ sceneManager, canvasSize, stepSize, safeAreaSize, safeAreaPosition }) {
+  constructor({ sceneManager, canvasSize, stepSize }) {
     this._canvasSize = canvasSize;
     this._stepSize = stepSize;
-    this._safeAreaSize = safeAreaSize;
-    this._safeAreaPosition = safeAreaPosition;
     this._sceneManager = sceneManager;
 
     this._totalScore = 0;
@@ -22,8 +20,6 @@ class State {
       state: this,
       canvasSize: this._canvasSize,
       stepSize: this._stepSize,
-      safeAreaSize: this._safeAreaSize,
-      safeAreaPosition: this._safeAreaPosition,
     }))
   }
 
@@ -32,8 +28,6 @@ class State {
       state: this,
       canvasSize: this._canvasSize,
       stepSize: this._stepSize,
-      safeAreaSize: this._safeAreaSize,
-      safeAreaPosition: this._safeAreaPosition,
     }))
   }
 
@@ -42,8 +36,6 @@ class State {
       state: this,
       canvasSize: this._canvasSize,
       stepSize: this._stepSize,
-      safeAreaSize: this._safeAreaSize,
-      safeAreaPosition: this._safeAreaPosition,
     }))
   }
 

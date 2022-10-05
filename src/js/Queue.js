@@ -22,8 +22,8 @@ class Queue {
 	}
 
 	setSize() {
-		this._areaPosition.x = this._stepSize.common * 3;
-		this._areaPosition.y = this._stepSize.common * 3;
+		this._areaPosition.x = 20;
+		this._areaPosition.y = 20;
 		this._areaSize.width = this._stepSize.common * 8 + Queue.SPAWN_BALLS_AT_TIME * this._stepSize.common * PreparedBall.SIZE_SCALE_FACTOR;
 		this._areaSize.height = this._stepSize.common * Queue.AREA_HEIGHT_SCALE_FACTOR;
 		this._areaCornerRadius = this._stepSize.common * Queue.AREA_CORNER_SCALE_FACTOR;

@@ -43,12 +43,6 @@ class SceneManager {
     this._futureScene = scene;
   }
 
-	handleKeyDown(event) {
-    if (this._futureScene || this._opacity) return;
-
-    if (this._currentScene) this._currentScene.handleKeyDown(event.code);
-	}
-
 	handleKeyUp(event) {
     if (this._futureScene || this._opacity) return;
 

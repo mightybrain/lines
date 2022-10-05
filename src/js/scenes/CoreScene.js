@@ -1,8 +1,6 @@
 class CoreScene {
-  constructor({ state, canvasSize, stepSize, safeAreaSize, safeAreaPosition }) {
+  constructor({ state, canvasSize, stepSize }) {
     this._canvasSize = canvasSize;
-    this._safeAreaSize = safeAreaSize;
-    this._safeAreaPosition = safeAreaPosition;
     this._stepSize = stepSize;
     this._state = state;
 
@@ -52,10 +50,6 @@ class CoreScene {
 
   handleKeyUp(code) {
 
-  }
-
-  handleKeyDown(code) {
-    
   }
 
   handleClick(event) {

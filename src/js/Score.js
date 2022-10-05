@@ -61,8 +61,8 @@ class Score {
 		const areaWidth = textWidth + this._spriteSize.common + this._stepSize.common * 9;
 
 		const areaPosition = {
-			x: this._canvasSize.width - areaWidth - this._stepSize.common * 3,
-			y: this._stepSize.common * 3,
+			x: this._canvasSize.width - areaWidth - 20,
+			y: 20,
 		}
 
 		const textPosition = {
@@ -79,8 +79,9 @@ class Score {
     renderRoundedRect(ctx, areaPosition.x, areaPosition.y, areaWidth, this._areaSize.height, this._areaCornerRadius);
 
     ctx.font = `${this._fontSize.common}px LuckiestGuy`;
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = '#FFFFFF';
     ctx.fillText(this._currentScore, textPosition.x, textPosition.y);
+
     ctx.drawImage(this._sprite, spritePosition.x, spritePosition.y, this._spriteSize.common, this._spriteSize.common);
   }
 }
