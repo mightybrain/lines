@@ -5,6 +5,8 @@ class Field {
 		this._score = score;
 		this._queue = queue;
 		this._state = state;
+
+		this._audioController = new AudioController();
 		
     this._map = [];
     this._setMap();
@@ -105,9 +107,7 @@ class Field {
 	}
 
 	clearSequences(cells) {
-		const audio = new Audio('audio/fall.wav')
-		audio.volume = 0.05;
-		audio.play();
+		this._audioController.playAudio('audio/fall.wav');
 
 		cells.forEach((cell, index) => {
 			cell.ball.destroy(index * 50);
@@ -187,9 +187,7 @@ class Field {
 	_moveBall(path) {
 		this._lockInput = true;
 
-		const audio = new Audio('audio/move.wav')
-		audio.volume = 0.1;
-		audio.play();
+		this._audioController.playAudio('audio/move.wav');
 
 		const ball = this._selectedCell.ball;
 		this._selectedCell.ball = null;
@@ -254,9 +252,7 @@ class Field {
 		const cell = this._map[y][x];
 		
 		if (cell.ball) {
-			const audio = new Audio('audio/tap.wav')
-			audio.volume = 0.1;
-			audio.play();
+			this._audioController.playAudio('audio/tap.wav');
 			this._selectedCell = cell;
 		} else if (this._selectedCell) {
 			const path = this._findPath(this._selectedCell, cell);

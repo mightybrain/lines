@@ -43,7 +43,7 @@ class ResultScene {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText(this._title, titlePosition.x, titlePosition.y);
 
-    const points = `${this._state.getTotalScore()} POINTS`;
+    const points = `${this._state.getTotalScore()} PTS`;
 
     const pointsPosition = {
       x: 20,
@@ -64,7 +64,6 @@ class ResultScene {
   }
 
   handleClick() {
-    this._state.setTotalScore(0);
     this._state.setCoreScene();
   }
 }

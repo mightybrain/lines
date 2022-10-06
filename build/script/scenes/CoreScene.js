@@ -4,6 +4,8 @@ class CoreScene {
     this._stepSize = stepSize;
     this._state = state;
 
+    this._state.setTotalScore(0);
+
     this._score = new Score({
       canvasSize: this._canvasSize,
       stepSize: this._stepSize,
