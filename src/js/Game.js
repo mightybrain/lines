@@ -2,65 +2,86 @@ class Game {
 	constructor(canvas) {
 		this._canvas = canvas;
 		this._ctx = canvas.getContext('2d');
-		this._canvasWidth = 676;
-		this._canvasHeight = 752;
+
+		this._canvasSize = {
+			width: 0,
+			height: 0,
+		};
+		this._stepSize = {
+			common: 0,
+		};
 		this._setSize();
-		this._model = new GameModel(
-			this._ctx,
-			this._canvasWidth,
-			this._canvasHeight,
-		);
-		this._renderer = new GameRenderer(
-			this._ctx,
-			this._model,
-			this._canvasWidth,
-			this._canvasHeight,
-		);
+
+		this._sceneManager = new SceneManager({
+			canvasSize: this._canvasSize,
+		});
+
+		this._state = new State({
+			canvasSize: this._canvasSize,
+			stepSize: this._stepSize,
+			sceneManager: this._sceneManager,
+		});
+
+		this._renderer = new Renderer({
+			ctx: this._ctx,
+			canvasSize: this._canvasSize,
+			sceneManager: this._sceneManager,
+		});
+
+		this._prevTimestamp = 0;
+
 		this._addEventHandlers();
 		this._startGame();
 	}
 
 	_startGame() {
-		requestAnimationFrame((timestamp) => {
+		this._state.setMainScene();
+
+		requestAnimationFrame(timestamp => {
 			this._gameLoop(timestamp);
 		});
 	}
 	
 	_gameLoop(timestamp) {
-		this._model.update(timestamp);
-		this._renderer.render();
-		requestAnimationFrame((newTimestamp) => {
+		requestAnimationFrame(newTimestamp => {
 			this._gameLoop(newTimestamp);
 		});
+
+		if (this._prevTimestamp) {
+			const delta = (timestamp - this._prevTimestamp) / 1000;
+			this._sceneManager.update({ delta, timestamp });
+			this._renderer.render();
+		}
+		
+		this._prevTimestamp = timestamp;
 	}
 
 	_addEventHandlers() {
 		window.addEventListener('resize', () => {
 			this._setSize();
-			this._model.setSize(
-				this._canvasWidth,
-				this._canvasHeight,
-			);
-			this._renderer.setSize(
-				this._canvasWidth,
-				this._canvasHeight,
-			);
+			this._sceneManager.setSize();
 		})
- 		this._canvas.addEventListener('click', (event) => {
-			this._handleClick(event);
+		window.addEventListener('click', event => {
+			this._sceneManager.handleClick(event);
 		})
 	}
 
 	_setSize() {
-		this._canvasWidth = document.documentElement.clientWidth;
-		this._canvasHeight = document.documentElement.clientHeight;
-		this._canvas.width = this._canvasWidth;
-		this._canvas.height = this._canvasHeight;
-	}
+		this._canvasSize.width = document.documentElement.clientWidth;
+		this._canvasSize.height = document.documentElement.clientHeight;
+		this._canvas.width = this._canvasSize.width;
+		this._canvas.height = this._canvasSize.height;
 
- 	_handleClick(event) {
-		this._model.handleClick(event);
+		if (this._canvasSize.width >= this._canvasSize.height) this._stepSize.common = (this._canvasSize.height - 100) / Game.MAX_STEPS.y;
+		else this._stepSize.common = (this._canvasSize.width - 40) / Game.MAX_STEPS.x;
 	}
 }
 
-new Game(document.getElementById('lines'));
+Game.MAX_STEPS = {
+	x: 160,
+	y: 160,
+}
+
+addEventListener('DOMContentLoaded', () => {
+	new Game(document.getElementById('lines'));
+})
