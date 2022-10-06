@@ -5,6 +5,7 @@ class ResultScene {
     this._state = state;
 
     this._title = 'GAME OVER';
+    this._points = `${this._state.getTotalScore()} PTS`;
     this._hint = [
       'CLICK',
       'OR TAP',
@@ -43,14 +44,12 @@ class ResultScene {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText(this._title, titlePosition.x, titlePosition.y);
 
-    const points = `${this._state.getTotalScore()} PTS`;
-
     const pointsPosition = {
       x: 20,
       y: titlePosition.y + this._spaceBetweenParagraphs + textHeight,
     }
 
-    ctx.fillText(points, pointsPosition.x, pointsPosition.y);
+    ctx.fillText(this._points, pointsPosition.x, pointsPosition.y);
 
     this._hint.forEach((line, index) => {
       const linePosition = {
@@ -64,6 +63,7 @@ class ResultScene {
   }
 
   handleClick() {
+    this._state.setTotalScore(0);
     this._state.setCoreScene();
   }
 }
