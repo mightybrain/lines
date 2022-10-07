@@ -1,8 +1,8 @@
 class MainScene {
-  constructor({ state, canvasSize, stepSize }) {
+  constructor({ sceneManager, canvasSize, stepSize }) {
     this._canvasSize = canvasSize;
     this._stepSize = stepSize;
-    this._state = state;
+    this._sceneManager = sceneManager;
 
     this._title = 'LINES';
     this._hint = [
@@ -55,7 +55,7 @@ class MainScene {
   }
 
   handleClick() {
-    this._state.setCoreScene();
+    this._sceneManager.setCoreScene();
   }
 
 }

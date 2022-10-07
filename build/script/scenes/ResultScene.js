@@ -1,11 +1,11 @@
 class ResultScene {
-  constructor({ state, canvasSize, stepSize }) {
+  constructor({ sceneManager, canvasSize, stepSize, points }) {
     this._canvasSize = canvasSize;
     this._stepSize = stepSize;
-    this._state = state;
+    this._sceneManager = sceneManager;
 
     this._title = 'GAME OVER';
-    this._points = `${this._state.getTotalScore()} PTS`;
+    this._points = `${points} PTS`;
     this._hint = [
       'CLICK',
       'OR TAP',
@@ -63,8 +63,7 @@ class ResultScene {
   }
 
   handleClick() {
-    this._state.setTotalScore(0);
-    this._state.setCoreScene();
+    this._sceneManager.setCoreScene();
   }
 }
 

@@ -1,6 +1,7 @@
 class SceneManager {
-  constructor({ canvasSize }) {
+  constructor({ canvasSize, stepSize }) {
 		this._canvasSize = canvasSize;
+    this._stepSize = stepSize;
 
     this._currentScene = null;
     this._futureScene = null;
@@ -39,8 +40,29 @@ class SceneManager {
     };
   }
 
-  setFutureScene(scene) {
-    this._futureScene = scene;
+  setMainScene() {
+    this._futureScene = new MainScene({
+      sceneManager: this,
+      canvasSize: this._canvasSize,
+      stepSize: this._stepSize,
+    })
+  }
+
+  setCoreScene() {
+    this._futureScene = new CoreScene({
+      sceneManager: this,
+      canvasSize: this._canvasSize,
+      stepSize: this._stepSize,
+    })
+  }
+
+  setResultScene(points) {
+    this._futureScene = new ResultScene({
+      sceneManager: this,
+      canvasSize: this._canvasSize,
+      stepSize: this._stepSize,
+      points,
+    })
   }
 
   handleClick(event) {

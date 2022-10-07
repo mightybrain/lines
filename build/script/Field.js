@@ -1,10 +1,10 @@
 class Field {
-  constructor({ canvasSize, stepSize, score, queue, state }) {
+  constructor({ canvasSize, stepSize, score, queue, sceneManager }) {
     this._canvasSize = canvasSize;
     this._stepSize = stepSize;
 		this._score = score;
 		this._queue = queue;
-		this._state = state;
+		this._sceneManager = sceneManager;
 
 		this._audioController = new AudioController();
 		
@@ -299,10 +299,8 @@ class Field {
 		this._queue.prepareBalls();
 
 		if (!freeCells.length) {
-			const currentScore = this._score.getCurrentScore();
-			this._state.setTotalScore(currentScore);
 			setTimeout(() => {
-				this._state.setResultScene();
+				this._sceneManager.setResultScene(this._score.getCurrentScore());
 			}, 1500)
 		}
 	}
