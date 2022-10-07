@@ -14,12 +14,7 @@ class Game {
 
 		this._sceneManager = new SceneManager({
 			canvasSize: this._canvasSize,
-		});
-
-		this._state = new State({
-			canvasSize: this._canvasSize,
 			stepSize: this._stepSize,
-			sceneManager: this._sceneManager,
 		});
 
 		this._renderer = new Renderer({
@@ -35,7 +30,7 @@ class Game {
 	}
 
 	_startGame() {
-		this._state.setMainScene();
+		this._sceneManager.setMainScene();
 
 		requestAnimationFrame(timestamp => {
 			this._gameLoop(timestamp);

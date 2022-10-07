@@ -84,6 +84,10 @@ class Ball {
 		}
 	}
 
+	getKey() {
+		return this._key;
+	}
+
   getStage() {
     return this._stage;
   }

@@ -1,8 +1,8 @@
 class CoreScene {
-  constructor({ state, canvasSize, stepSize }) {
+  constructor({ sceneManager, canvasSize, stepSize }) {
     this._canvasSize = canvasSize;
     this._stepSize = stepSize;
-    this._state = state;
+    this._sceneManager = sceneManager;
 
     this._score = new Score({
       canvasSize: this._canvasSize,
@@ -21,7 +21,7 @@ class CoreScene {
       stepSize: this._stepSize,
       score: this._score,
       queue: this._queue,
-      state: this._state,
+      sceneManager: this._sceneManager,
     });
 
     this._field.spawnBalls();
