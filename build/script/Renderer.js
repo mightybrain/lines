@@ -2,13 +2,13 @@ class Renderer {
 	constructor({ ctx, canvasSize, sceneManager }) {
 		this._ctx = ctx;
 		this._canvasSize = canvasSize;
-    this._sceneManager = sceneManager;
+		this._sceneManager = sceneManager;
 	}
 
 	render() {
 		this._clearCanvas();
 		this._drawBackground();
-    this._drawScene();
+		this._drawScene();
 	}
 
 	_clearCanvas() {
@@ -20,7 +20,7 @@ class Renderer {
 		this._ctx.fillRect(0, 0, this._canvasSize.width, this._canvasSize.height);
 	}
 
-  _drawScene() {
-    this._sceneManager.render(this._ctx);
-  }
+	_drawScene() {
+		this._sceneManager.render(this._ctx);
+	}
 }

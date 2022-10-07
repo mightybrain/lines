@@ -1,5 +1,5 @@
 class Ball {
-  constructor({ key, color, size, position, scale = 0, birthDelay = 0 }) {
+	constructor({ key, color, size, position, scale = 0, birthDelay = 0 }) {
 		this._key = key;
 		this._color = color;
 		this._position = position;
@@ -12,7 +12,7 @@ class Ball {
 		this._startDestroyingTimestamp = 0;
 
 		this._stage = Ball.STAGES[1];
-  }
+	}
 
 	update(time) {
 		if (this._stage === Ball.STAGES[1]) this._updateBirth(time);
@@ -20,7 +20,7 @@ class Ball {
 	}
 
 	_updateBirth({ timestamp }) {
-    if (!this._startBirthTimestamp) this._startBirthTimestamp = timestamp + this._birthDelay;
+		if (!this._startBirthTimestamp) this._startBirthTimestamp = timestamp + this._birthDelay;
 
 		const birthTime = timestamp - this._startBirthTimestamp;
 
@@ -88,9 +88,9 @@ class Ball {
 		return this._key;
 	}
 
-  getStage() {
-    return this._stage;
-  }
+	getStage() {
+		return this._stage;
+	}
 
 	getSize() {
 		return this._size;

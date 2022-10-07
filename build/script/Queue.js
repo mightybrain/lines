@@ -1,9 +1,9 @@
 class Queue {
-  constructor({ canvasSize, stepSize }) {
-    this._canvasSize = canvasSize;
-    this._stepSize = stepSize;
+	constructor({ canvasSize, stepSize }) {
+		this._canvasSize = canvasSize;
+		this._stepSize = stepSize;
 
-    this._balls = [];
+		this._balls = [];
 
 		this._areaPosition = {
 			x: 0,
@@ -15,7 +15,7 @@ class Queue {
 		}
 		this._areaCornerRadius = 0;
 		this.setSize();
-  }
+	}
 
 	update(time) {
 		this._balls.forEach(ball => ball.update(time));
@@ -38,12 +38,12 @@ class Queue {
 		});
 	}
 
-  render(ctx) {
-    ctx.fillStyle = '#5DBB46';
-    renderRoundedRect(ctx, this._areaPosition.x, this._areaPosition.y, this._areaSize.width, this._areaSize.height, this._areaCornerRadius);
+	render(ctx) {
+		ctx.fillStyle = '#5DBB46';
+		renderRoundedRect(ctx, this._areaPosition.x, this._areaPosition.y, this._areaSize.width, this._areaSize.height, this._areaCornerRadius);
 
 		this._balls.forEach(ball => ball.render(ctx));
-  }
+	}
 
 	getBallsInQueue() {
 		return this._balls.slice();
@@ -69,8 +69,8 @@ class Queue {
 	}
 
 	_getRandomBallKey() {
-    const keys = Object.keys(Ball.COLORS);
-    const index = getRandomFromRange(0, keys.length);
+		const keys = Object.keys(Ball.COLORS);
+		const index = getRandomFromRange(0, keys.length);
 		return keys[index];
 	}
 }

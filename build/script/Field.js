@@ -1,15 +1,15 @@
 class Field {
-  constructor({ canvasSize, stepSize, score, queue, sceneManager }) {
-    this._canvasSize = canvasSize;
-    this._stepSize = stepSize;
+	constructor({ canvasSize, stepSize, score, queue, sceneManager }) {
+		this._canvasSize = canvasSize;
+		this._stepSize = stepSize;
 		this._score = score;
 		this._queue = queue;
 		this._sceneManager = sceneManager;
 
 		this._audioController = new AudioController();
 		
-    this._map = [];
-    this._setMap();
+		this._map = [];
+		this._setMap();
 
 		this._lockInput = false;
 
@@ -17,22 +17,22 @@ class Field {
 		this._ballsTransports = [];
 		this._selectedCell = null;
 
-    this._size = 0;
-    this._cornerRadius = 0;
-    this._innerOffset = 0;
-    this._cellsBetweenSize = {
+		this._size = 0;
+		this._cornerRadius = 0;
+		this._innerOffset = 0;
+		this._cellsBetweenSize = {
 			common: 0,
 		};
-    this._cellSize = {
+		this._cellSize = {
 			common: 0,
 		};
-    this._cellCornerRadius = 0;
-    this._position = {
-      x: 0,
-      y: 0,
-    }
-    this.setSize();
-  }
+		this._cellCornerRadius = 0;
+		this._position = {
+			x: 0,
+			y: 0,
+		}
+		this.setSize();
+	}
 
 
 	update(time) {
@@ -60,16 +60,16 @@ class Field {
 
 	setSize() {
 		this._size = this._stepSize.common * Field.SIZE_SCALE_FACTOR;
-    this._cornerRadius = this._stepSize.common * Field.CORNER_SCALE_FACTOR;
+		this._cornerRadius = this._stepSize.common * Field.CORNER_SCALE_FACTOR;
 		this._innerOffset = this._stepSize.common * Field.INNER_OFFSET_SCALE_FACTOR;
 		this._cellsBetweenSize.common = this._stepSize.common * Field.CELLS_BETWEEN_SIZE_SCALE_FACTOR;
 		this._cellSize.common = this._stepSize.common * Field.CELL_SIZE_SCALE_FACTOR;
-    this._cellCornerRadius = this._stepSize.common * Field.CELL_CORNER_SCALE_FACTOR;
+		this._cellCornerRadius = this._stepSize.common * Field.CELL_CORNER_SCALE_FACTOR;
 		this._position.x = (this._canvasSize.width - this._size) / 2;
 		this._position.y = (this._canvasSize.height - this._size) / 2;
 
 		this._map.forEach((row, y) => {
-      row.forEach((cell, x) => {
+			row.forEach((cell, x) => {
 				cell.position.x = this._position.x + this._innerOffset + (this._cellSize.common + this._cellsBetweenSize.common) * x;
 				cell.position.y = this._position.y + this._innerOffset + (this._cellSize.common + this._cellsBetweenSize.common) * y;
 
@@ -120,37 +120,41 @@ class Field {
 		const sequences = [];
 
 		cells.forEach(cell => {
-			const key = cell.ball.getKey();
-	
 			axes.forEach(axis => {
-				const queue = [cell];
-				const sequence = [cell];
-				const directions = Field.DIRECTIONS
-					.filter(direction => direction.axis === axis)
-					.map(direction => direction.offset)
-		
-				do {
-					const part = queue.shift();
-					directions.forEach(direction => {
-						const x = part.coords.x + direction.x; 
-						const y = part.coords.y + direction.y;
-						
-						if (!this._isCellExist(x, y)) return;
-	
-						const nextCell = this._map[y][x];
-	
-						if (nextCell.ball && nextCell.ball.getKey() === key && !sequence.includes(nextCell)) {
-							sequence.push(nextCell);
-							queue.push(nextCell);
-						}
-					})
-				} while (queue.length)
-	
+				const sequence = this._findSequenceFromCellByAxis(cell, axis);
 				if (sequence.length >= Field.MIN_SEQUENCE_LENGTH) sequences.push(sequence);
 			})
 		})
+		
+		return Array.from(new Set(sequences.flat()));
+	}
 
-		return sequences.flat();
+	_findSequenceFromCellByAxis(cell, axis) {
+		const key = cell.ball.getKey();
+		const queue = [cell];
+		const sequence = [cell];
+		const directions = Field.DIRECTIONS
+			.filter(direction => direction.axis === axis)
+			.map(direction => direction.offset)
+
+		do {
+			const part = queue.shift();
+			directions.forEach(direction => {
+				const x = part.coords.x + direction.x; 
+				const y = part.coords.y + direction.y;
+				
+				if (!this._isCellExist(x, y)) return;
+
+				const nextCell = this._map[y][x];
+
+				if (nextCell.ball && nextCell.ball.getKey() === key && !sequence.includes(nextCell)) {
+					sequence.push(nextCell);
+					queue.push(nextCell);
+				}
+			})
+		} while (queue.length)
+
+		return sequence;
 	}
 
 	_moveBall(path) {
@@ -177,7 +181,7 @@ class Field {
 		const directions = Field.DIRECTIONS
 			.filter(direction => direction.axis === 'x' || direction.axis === 'y')
 			.map(direction => direction.offset)
-		
+
 		const steps = [{ cell: from, path: [from] }];
 		const viewed = [from];
 		let path = null;
@@ -213,7 +217,7 @@ class Field {
 		return x >= 0 && y >= 0 && x < Field.CELLS_BY_SIDE_COUNTER && y < Field.CELLS_BY_SIDE_COUNTER;
 	}
 
-  handleClick(event) {
+	handleClick(event) {
 		if (this._lockInput) return;
 
  		const borderTop = this._position.y + this._innerOffset;
@@ -234,11 +238,11 @@ class Field {
 			const path = this._findPath(this._selectedCell, cell);
 			if (path) this._moveBall(path);
 		}
-  }
+	}
 
 	spawnBalls() {
-		const ballsInQueue = this._queue.getBallsInQueue();
 		let freeCells = this._getFreeCells();
+		const ballsInQueue = this._queue.getBallsInQueue();
 		const ballsToSpawnCounter = Math.min(freeCells.length, ballsInQueue.length);
 		const cells = [];
 		
