@@ -116,67 +116,36 @@ class Field {
 	}
 
 	findSequences(cells) {
-		const directions = [
-			{
-				axis: 'y',
-				offset: { x: 0, y: -1 }
-			},
-			{
-				axis: 'x',
-				offset: { x: 1, y: 0 }
-			},
-			{
-				axis: 'y',
-				offset: { x: 0, y: 1 }
-			},
-			{
-				axis: 'x',
-				offset: { x: -1, y: 0 }
-			},
-			{
-				axis: 'xy',
-				offset: { x: -1, y: -1 }
-			},
-			{
-				axis: 'xy',
-				offset: { x: 1, y: 1 }
-			},
-			{
-				axis: 'yx',
-				offset: { x: -1, y: 1 }
-			},
-			{
-				axis: 'yx',
-				offset: { x: 1, y: -1 }
-			}
-		];
 		const axes = ['x', 'y', 'xy', 'yx'];
 		const sequences = [];
-		cells.forEach(cell => {
-			const { key } = cell.ball.getColorAndKey();
 
+		cells.forEach(cell => {
+			const key = cell.ball.getKey();
+	
 			axes.forEach(axis => {
 				const queue = [cell];
 				const sequence = [cell];
-				const axisDirections = directions.filter(direction => direction.axis === axis);
+				const directions = Field.DIRECTIONS
+					.filter(direction => direction.axis === axis)
+					.map(direction => direction.offset)
 		
 				do {
 					const part = queue.shift();
-					axisDirections.forEach(direction => {
-						const x = part.coords.x + direction.offset.x; 
-						const y = part.coords.y + direction.offset.y;
+					directions.forEach(direction => {
+						const x = part.coords.x + direction.x; 
+						const y = part.coords.y + direction.y;
 						
-						if (x < 0 || y < 0 || x > Field.CELLS_BY_SIDE_COUNTER - 1 || y > Field.CELLS_BY_SIDE_COUNTER - 1) return;
-
+						if (!this._isCellExist(x, y)) return;
+	
 						const nextCell = this._map[y][x];
-
-						if (nextCell.ball && nextCell.ball.getColorAndKey().key === key && !sequence.includes(nextCell)) {
+	
+						if (nextCell.ball && nextCell.ball.getKey() === key && !sequence.includes(nextCell)) {
 							sequence.push(nextCell);
 							queue.push(nextCell);
 						}
 					})
 				} while (queue.length)
-
+	
 				if (sequence.length >= Field.MIN_SEQUENCE_LENGTH) sequences.push(sequence);
 			})
 		})
@@ -192,6 +161,7 @@ class Field {
 		const ball = this._selectedCell.ball;
 		this._selectedCell.ball = null;
 		this._selectedCell = null;
+
 		this._ballsTransports.push(new BallTransport({
 			stepSize: this._stepSize,
 			cellSize: this._cellSize,
@@ -204,7 +174,9 @@ class Field {
 	}
 
 	_findPath(from, to) {
-		const directions = [{ x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x:-1, y: 0 }];
+		const directions = Field.DIRECTIONS
+			.filter(direction => direction.axis === 'x' || direction.axis === 'y')
+			.map(direction => direction.offset)
 		
 		const steps = [{ cell: from, path: [from] }];
 		const viewed = [from];
@@ -222,7 +194,7 @@ class Field {
 				const x = step.cell.coords.x + direction.x; 
 				const y = step.cell.coords.y + direction.y;
 
-				if (x < 0 || y < 0 || x > Field.CELLS_BY_SIDE_COUNTER - 1 || y > Field.CELLS_BY_SIDE_COUNTER - 1) return;
+				if (!this._isCellExist(x, y)) return;
 
 				const cell = this._map[y][x];
 
@@ -235,6 +207,10 @@ class Field {
 		} while (steps.length && path === null)
 
 		return path;
+	}
+
+	_isCellExist(x, y) {
+		return x >= 0 && y >= 0 && x < Field.CELLS_BY_SIDE_COUNTER && y < Field.CELLS_BY_SIDE_COUNTER;
 	}
 
   handleClick(event) {
@@ -315,4 +291,38 @@ Field.CELL_CORNER_SCALE_FACTOR = 6;
 Field.CELLS_BY_SIDE_COUNTER = 9;
 Field.SCORE_PER_BALL = 1;
 Field.MIN_SEQUENCE_LENGTH = 5;
+Field.DIRECTIONS = [
+	{
+		axis: 'y',
+		offset: { x: 0, y: -1 }
+	},
+	{
+		axis: 'x',
+		offset: { x: 1, y: 0 }
+	},
+	{
+		axis: 'y',
+		offset: { x: 0, y: 1 }
+	},
+	{
+		axis: 'x',
+		offset: { x: -1, y: 0 }
+	},
+	{
+		axis: 'xy',
+		offset: { x: -1, y: -1 }
+	},
+	{
+		axis: 'xy',
+		offset: { x: 1, y: 1 }
+	},
+	{
+		axis: 'yx',
+		offset: { x: -1, y: 1 }
+	},
+	{
+		axis: 'yx',
+		offset: { x: 1, y: -1 }
+	}
+];
 
